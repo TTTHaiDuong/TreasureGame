@@ -183,8 +183,8 @@ public class Block : MonoBehaviour
     public Explosion Explosion;
     public ReadMap ReadMap;
 
-    [HideInInspector] public Timer InitTimer;
-    [HideInInspector] public Timer RecoverTimer;
+    public Timer InitTimer;
+    public Timer RecoverTimer;
 
     private void Awake()
     {
@@ -207,6 +207,7 @@ public class Block : MonoBehaviour
         if (!RecoverTimer.IsRunning)
         {
             Decoration.Decorate(DecoratedBlock.Grass);
+            DetectBombAround(9);
 
             foreach (GameItem item in Secret)
             {
@@ -227,7 +228,16 @@ public class Block : MonoBehaviour
                     player.Bag.Add(item);
                 }
             }
+
+            Secret.Clear();
         }
+    }
+
+    public void DetectBombAround(int area)
+    {
+        Island island = transform.parent.GetComponent<Island>();
+        int count = Glasses.CountOfBombsAround(this, island.GetAllBlocks(), area);
+        Text.SetText(count.ToString(), 10);
     }
 
     public void Init()
@@ -305,13 +315,14 @@ public class DecoratedTopBlocks : List<TopBlock>
 {
     public DecoratedTopBlocks(Block owner, List<TopBlock> list)
     {
-        Origin = owner.TopBlock;
-        Position = owner.TopBlock.transform.position;
+        Origin = owner;
         Init(list);
+
+        Decorate(DecoratedBlock.New);
     }
 
-    public Vector3 Position;
-    public TopBlock Origin;
+    public Vector3 Position { get { return Origin.TopBlock.transform.position; } }
+    public Block Origin;
 
     public void Init(List<TopBlock> list)
     {
@@ -319,8 +330,10 @@ public class DecoratedTopBlocks : List<TopBlock>
         foreach (TopBlock block in list)
         {
             TopBlock clone = GameObject.Instantiate(block);
-            clone.gameObject.SetActive(false);
+            clone.transform.SetParent(Origin.transform);
             clone.transform.position = Position;
+            clone.gameObject.SetActive(false);
+            Add(clone);
         }
     }
 
@@ -328,8 +341,8 @@ public class DecoratedTopBlocks : List<TopBlock>
     {
         if (type < 0 || (int)type >= Count) return;
 
-        Origin.gameObject.SetActive(false);
-        Origin = this[(int)type];
-        Origin.gameObject.SetActive(true);
+        Origin.TopBlock.gameObject.SetActive(false);
+        Origin.TopBlock = this[(int)type];
+        Origin.TopBlock.gameObject.SetActive(true);
     }
 }

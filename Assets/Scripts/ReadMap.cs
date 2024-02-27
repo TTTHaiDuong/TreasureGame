@@ -18,8 +18,8 @@ namespace GameUI
     {
         [SerializeField] private TextMeshProUGUI QuestionText;
         [SerializeField] private TextMeshProUGUI LimitTimeText;
-        [SerializeField] private TextMeshProUGUI AnswerText;
         [SerializeField] private MultipleChoice MultipleChoices;
+        [SerializeField] private TMP_InputField AnswerText;
         [SerializeField] private Warning Warning;
 
         private Map IsReading;
@@ -36,7 +36,7 @@ namespace GameUI
             if (active)
             {
                 if (IsReading.Answer(AnswerText.text)) CorrectAnswer();
-                else InCorrectAnswer(new object());
+                else InCorrectAnswer();
             }
         }
 
@@ -58,7 +58,7 @@ namespace GameUI
             gameObject.SetActive(true);
             IsReading = map;
             IsReading.Timer.TickListening(Counting);
-            IsReading.Timer.FinishListening(InCorrectAnswer);
+            IsReading.Timer.FinishListening(InvokeInCorrect);
 
             Player = player;
             Player.SetActive(false);
@@ -74,7 +74,9 @@ namespace GameUI
             Exit();
         }
 
-        private void InCorrectAnswer(object obj)
+        private void InvokeInCorrect(object obj) => InCorrectAnswer();
+
+        private void InCorrectAnswer()
         {
             if (IsReading.Penalty) Penalty();
             Exit();
@@ -97,7 +99,7 @@ namespace GameUI
 
         public void Exit()
         {
-            if (IsReading.IsLimitTime) InCorrectAnswer(true);
+            if (IsReading.IsLimitTime) InCorrectAnswer();
             ClearAll();
             gameObject.SetActive(false);
         }

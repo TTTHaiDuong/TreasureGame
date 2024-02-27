@@ -66,7 +66,7 @@ namespace TreasureGame
             else return false;
         }
 
-        public static bool CompareProperties(object obj1, object obj2, params string[] ignore)
+        private static bool CompareProperties(object obj1, object obj2, params string[] ignore)
         {
             PropertyInfo[] properties1 = obj1.GetType().GetProperties();
             PropertyInfo[] properties2 = obj2.GetType().GetProperties();
@@ -84,7 +84,7 @@ namespace TreasureGame
             return true;
         }
 
-        public static bool CompareFields(object obj1, object obj2, params string[] ignore)
+        private static bool CompareFields(object obj1, object obj2, params string[] ignore)
         {
             FieldInfo[] fields1 = obj1.GetType().GetFields();
             FieldInfo[] fields2 = obj2.GetType().GetFields();
@@ -97,6 +97,7 @@ namespace TreasureGame
                 if (field2 == null || field1.FieldType != field2.FieldType)
                     return false;
 
+                if (obj1 == null || obj2 == null) Debug.Log("Loi nullll");
                 if (!field1.GetValue(obj1).Equals(field2.GetValue(obj2))) return false;
             }
             return true;
@@ -105,6 +106,11 @@ namespace TreasureGame
 
     public class ItemList : List<GameItem>
     {
+        public delegate void Changed();
+        private event Changed ListChanged;
+
+        private bool IsRangeChangedProcess;
+
         public new void Add(GameItem newItem)
         {
             foreach (GameItem item in this)
@@ -115,11 +121,30 @@ namespace TreasureGame
                     return;
                 }
             base.Add(newItem);
+
+            if (!IsRangeChangedProcess) ListChanged?.Invoke();
         }
 
         public new void AddRange(IEnumerable<GameItem> newItems)
         {
-            foreach (GameItem item in newItems) Add(item);
+            for (int i = 0; i < newItems.Count(); i++)
+            {
+                Add(newItems.ToArray()[i]);
+                if (i != 0) IsRangeChangedProcess = true;
+            }
+
+            IsRangeChangedProcess = false;
+        }
+
+        public new void Remove(GameItem item)
+        {
+            base.Remove(item);
+            ListChanged?.Invoke();
+        }
+        public new void Clear()
+        {
+            base.Clear();
+            ListChanged?.Invoke();
         }
 
         public IEnumerable<T> GetItems<T>()
@@ -127,6 +152,13 @@ namespace TreasureGame
             foreach (GameItem item in this)
                 if (item is T needs) yield return needs;
         }
+
+        public void ListChangedListening(Changed changed)
+        {
+            if (!DelegateTool.ExistInside(ListChanged, changed)) ListChanged += changed;
+        }
+
+        public void ListChangedRecall(Changed changed) => ListChanged -= changed;
     }
 
     //public class ItemsList : List<GameItem>, ICloneable

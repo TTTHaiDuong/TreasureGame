@@ -21,6 +21,7 @@ namespace TreasureGame
         public Inventory Inventory;
         public GameObject Answer;
         public Explosion Explosion;
+        public ReadMap ReadMap;
 
         // Update is called once per frame
         void Update()
@@ -47,6 +48,11 @@ namespace TreasureGame
                     Camera.main.fieldOfView += 1;
                 }
             }
+        }
+
+        public void InitNonMonoBehaviours()
+        {
+
         }
     }
 

@@ -18,30 +18,31 @@ public class PlayUI : MonoBehaviour
 
     private void Awake()
     {
-        Player = Player.Main;
+        //Player = Player.Main;
     }
 
     private void Start()
     {
-        DisplayPlayer(Player);
+        //DisplayPlayer(Player);
     }
 
     public void DisplayPlayer(Player player)
     {
-        Player.RevivalTimer.WhenStart -= OnBomb;
-        Player.RevivalTimer.Tick -= Counting;
-        Player.RevivalTimer.WhenFinish -= Revival;
+        Player = player;
+        Player.LivingTimer.WhenStart -= OnBomb;
+        Player.LivingTimer.Tick -= Counting;
+        Player.LivingTimer.WhenFinish -= Revival;
         //Player.RevivalTimer.WhenBreak -= Revival;
 
-        if (Player.Main.Equals(player))
+        //if (Player.Main.Equals(player))
         {
             ScoreTable.text = player.Score.ToString();
             GoldTable.text = player.Gold.ToString();
 
             Player = player;
-            Player.RevivalTimer.WhenStart += OnBomb;
-            Player.RevivalTimer.Tick += Counting;
-            Player.RevivalTimer.WhenFinish += Revival;
+            Player.LivingTimer.WhenStart += OnBomb;
+            Player.LivingTimer.Tick += Counting;
+            Player.LivingTimer.WhenFinish += Revival;
             //Player.RevivalTimer.WhenBreak += Revival;
 
             SetBadge();
@@ -60,6 +61,6 @@ public class PlayUI : MonoBehaviour
 
     public void Counting(object obj)
     {
-        RevivalCounting.text = $"{(string)obj}\n<size=120%><b>{Player.RevivalTimer.Time:F0}</b></size>";
+        RevivalCounting.text = $"{(string)obj}\n<size=120%><b>{Player.LivingTimer.Time:F0}</b></size>";
     }
 }

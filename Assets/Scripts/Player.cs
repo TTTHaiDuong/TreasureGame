@@ -13,24 +13,18 @@ public class Player : MonoBehaviour
     [SerializeField] private int _Gold;
     [SerializeField] private int _Score;
     [SerializeField] private string _Name;
-    [SerializeField] private Animator Animator; //Add
+    [SerializeField] private Animator Animator;
 
-    public static Player Main;
-
-    public FlyText NameTable; //Add
-    public Flag Flag; //Add
+    public FlyText NameTable;
     public ItemList Bag;
-    public ReadMap ReadMap; //
-    public Island Island; //
+    public Island Island;
     public PlayUI PlayUI;
     public Inventory Inventory;
     public UseItem UseItem;
 
     public Vector3 TargetPosition;
-    public Timer RevivalTimer;
-    public int Progress;
-
-    public bool IsMainPlayer;
+    public Timer LivingTimer;
+    public bool IsActive;
 
     public string Name
     {
@@ -60,16 +54,18 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        if (Main == null) Main = this;
-
         Bag = new();
 
-        RevivalTimer = gameObject.AddComponent<Timer>();
+        LivingTimer = gameObject.AddComponent<Timer>();
+        LivingTimer.StartListening(SetActive);
+        LivingTimer.FinishListening(SetActive);
+        LivingTimer.StartObj = false;
+        LivingTimer.FinishObj = true;
         //RevivalTimer.WhenStart += Flag.PutUpFlag;
         //RevivalTimer.WhenFinish += Flag.Revival;
         //RevivalTimer.WhenBreak += Flag.Revival;
 
-        PlayUI = GameObject.FindGameObjectWithTag("PlayUI").GetComponent<PlayUI>();
+        PlayUI.DisplayPlayer(this);
         //Island = GameObject.FindGameObjectWithTag("Island").GetComponent<Island>();
     }
 
@@ -77,36 +73,36 @@ public class Player : MonoBehaviour
     {
         NameTable.LookAt(Camera.main.transform.forward);
         Name = "Dương";
+
+        IsActive = true;
     }
 
     void Update()
     {
-        if (Main == null) Main = this;
-        // Khong nen de bo dieu khien o day, phai dua ra ngoai de tao game multi-player.
-        if (Input.GetMouseButton(0))
+        if (IsActive)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.CompareTag("TopBlock"))
-                MoveTo(hit.collider.bounds.center);
+            MoveInput(Input.GetMouseButton(0));
+            if (Input.GetKeyDown(KeyCode.Space) && !Animator.GetBool("IsWalking"))
+            {
+                if (!LivingTimer.IsRunning) DigUp();
+            }
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                Glasses glasses = new(1);
+                glasses.Detect(BlockUnderFoot(), Island.GetComponent<Island>().GetAllBlocks(), 9);
+            }
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                Bag.Add(new Glasses(1));
+                Bag.Add(new Bomb(1, 200));
+            }
         }
-        if (Input.GetKeyDown(KeyCode.Space) && !Animator.GetBool("IsWalking"))
-        {
-            if (!RevivalTimer.IsRunning) DigUp();
-        }
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Glasses glasses = new(1);
-            glasses.Detect(BlockUnderFoot(), Island.GetComponent<Island>().GetAllBlocks(), 9);
-        }
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            RevivalTimer.Break();
-        }
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            Bag.Add(new Glasses(1));
-            Bag.Add(new Bomb(1, 200));
-        }
+        SkipInput(Input.GetKeyDown(KeyCode.C));
+    }
+
+    private void SkipInput(bool keyCaught)
+    {
+        if (keyCaught) LivingTimer.Time = 0;
     }
 
     public void GetItems(GameItem[] list)
@@ -128,12 +124,21 @@ public class Player : MonoBehaviour
         _Name = name;
         NameTable.SetText(name);
     }
-
     public string GetName() => _Name;
+
+    private void MoveInput(bool key)
+    {
+        if (key)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.CompareTag("TopBlock"))
+                MoveTo(hit.collider.bounds.center);
+        }
+    }
 
     public void MoveTo(Vector3 targetPosition)
     {
-        if (!RevivalTimer.IsRunning)
+        if (!LivingTimer.IsRunning)
         {
             TargetPosition = targetPosition;
             if (!Animator.GetBool("IsWalking")) StartCoroutine(Go());
@@ -163,10 +168,17 @@ public class Player : MonoBehaviour
 
     public void Exploded(float second)
     {
-        if (RevivalTimer.IsRunning) RevivalTimer.Time += second;
-        else RevivalTimer.Play(second);
+        if (LivingTimer.IsRunning) LivingTimer.Time += second;
+        else LivingTimer.Play(second);
 
         PlayUI.DisplayPlayer(this);
+    }
+
+    public void SetActive(object active)
+    {
+        IsActive = (bool)active;
+        foreach (Transform partOfBody in transform)
+            if (partOfBody.CompareTag("PartOfBody")) partOfBody.gameObject.SetActive((bool)active);
     }
 
     public void DigUp(Block block)

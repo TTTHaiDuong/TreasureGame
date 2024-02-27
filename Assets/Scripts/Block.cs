@@ -181,6 +181,7 @@ public class Block : MonoBehaviour
     public TextOfBlock Text;
     public ItemList Secret;
     public Explosion Explosion;
+    public ReadMap ReadMap;
 
     [HideInInspector] public Timer InitTimer;
     [HideInInspector] public Timer RecoverTimer;
@@ -213,11 +214,13 @@ public class Block : MonoBehaviour
                 {
                     if (!Explosion.Timer.IsRunning)
                         Explosion.Play(Explosion.Duration / 2, player.transform.position);
+
+                    player.LivingTimer.TickObj = "Bạn đã đào phải mìn!";
                     bomb.Active(bomb.Count, player);
                 }
                 else if (item is Map map && !map.Pass)
                 {
-                    map.Read(player);
+                    ReadMap.Read(player, map);
                 }
                 else
                 {

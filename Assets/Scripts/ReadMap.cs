@@ -25,17 +25,30 @@ namespace GameUI
         private Map IsReading;
         private Player Player;
 
+        private void Update()
+        {
+            ExitInvoke(Input.GetKeyDown(KeyCode.Escape));
+            CheckAnswer(Input.GetKeyDown(KeyCode.Return));
+        }
+
+        private void CheckAnswer(bool active)
+        {
+            if (active)
+            {
+                if (IsReading.Answer(AnswerText.text)) CorrectAnswer();
+                else InCorrectAnswer(new object());
+            }
+        }
+
         public void ClearAll()
         {
             QuestionText.text = string.Empty;
             LimitTimeText.text = string.Empty;
             AnswerText.text = string.Empty;
 
-            if (IsReading != null)
-            {
-                IsReading.Timer.Recall();
-                IsReading.CorrectAnswer -= CorrectAnswer;
-            }
+            IsReading?.Timer.Recall();
+            Player.SetActive(true);
+
             Warning.OnPointedExit();
             Warning.gameObject.SetActive(false);
         }
@@ -46,11 +59,11 @@ namespace GameUI
             IsReading = map;
             IsReading.Timer.TickListening(Counting);
             IsReading.Timer.FinishListening(InCorrectAnswer);
-            IsReading.CorrectAnswer += CorrectAnswer;
 
             Player = player;
+            Player.SetActive(false);
 
-            if (IsReading.Penalty) Warning.gameObject.SetActive(true);
+            Warning.gameObject.SetActive(IsReading.Penalty);
             QuestionText.text = map.GetQuestion();
         }
 
@@ -77,8 +90,14 @@ namespace GameUI
             LimitTimeText.text = $"Còn: {IsReading.Timer.Time}";
         }
 
+        private void ExitInvoke(bool active)
+        {
+            if (active) Exit();
+        }
+
         public void Exit()
         {
+            if (IsReading.IsLimitTime) InCorrectAnswer(true);
             ClearAll();
             gameObject.SetActive(false);
         }
@@ -206,7 +225,7 @@ namespace GameUI
             Question = "Xin chao!";
             Result = answer;
             Choices = choices;
-            IsLimitTime = new GameObject().AddComponent<Timer>();
+            Timer = new GameObject().AddComponent<Timer>();
         }
 
         public event TreasureHunt CorrectAnswer;
@@ -226,12 +245,6 @@ namespace GameUI
         public bool Penalty;
         public GameItem[] Reward;
 
-        public void Read(Player player)
-        {
-            ReadMap read = GameObject.FindGameObjectWithTag("ReadMap").GetComponent<ReadMap>();
-            read.Read(player, this);
-        }
-
         public string GetQuestion()
         {
             if (IsLimitTime) Timer.Play(LimitTime);
@@ -246,15 +259,23 @@ namespace GameUI
             return GetQuestion();
         }
 
-        public void Answer(string answer)
+        public bool Answer(string answer)
         {
-            if (!Pass && CheckAnswer(answer)) RightAnswer();
-            else WrongAnswer();
+            if (!Pass && CheckAnswer(answer))
+            {
+                RightAnswer();
+                return true;
+            }
+            else
+            {
+                WrongAnswer();
+                return false;
+            }
         }
 
-        public void Answer(int choice)
+        public bool Answer(int choice)
         {
-            Answer(OutChoices[choice]);
+            return Answer(OutChoices[choice]);
         }
 
         private bool CheckAnswer(string answer)

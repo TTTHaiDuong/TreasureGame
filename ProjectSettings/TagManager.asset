@@ -12,6 +12,7 @@ TagManager:
   - Island
   - Inventory
   - ReadMap
+  - PartOfBody
   layers:
   - Default
   - TransparentFX

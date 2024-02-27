@@ -34,7 +34,8 @@ namespace GameUI
 
         public void PopUp()
         {
-            ItemList itemsList = Player.Main.Bag;
+            //ItemList itemsList = Player.Main.Bag;
+            ItemList itemList = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Bag;
 
             foreach (Transform clear in BagPanel)
                 if (clear.CompareTag("ImageItem")) Destroy(clear.gameObject);
@@ -43,13 +44,13 @@ namespace GameUI
             for (int i = 0; i < ContainerSize.y; i++)
                 for (int j = 0; j < ContainerSize.x; j++)
                 {
-                    if (k >= itemsList.Count) return;
+                    if (k >= itemList.Count) return;
                     Vector3 position = InitialPosition;
                     position += new Vector3(DistanceBetweenItems + (DistanceBetweenItems + ItemsSize.x) * j,
                         -DistanceBetweenItems - (DistanceBetweenItems + ItemsSize.y) * i);
 
                     ItemImage addItem = Instantiate(ItemImage);
-                    addItem.Init(itemsList[k], ItemsSize);
+                    addItem.Init(itemList[k], ItemsSize);
                     AssignEvent(addItem);
 
                     addItem.RectImage.anchorMax = new Vector2(0, 1);

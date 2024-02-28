@@ -171,7 +171,7 @@ public class Timer : MonoBehaviour
 
     public bool IsRunning;
     public float Time;
-    public float Delta = 0.1f;
+    public float Delta = 1f;
 
     public void StartListening(TimerHandling start)
     {
@@ -235,7 +235,7 @@ public class Timer : MonoBehaviour
         {
             Time -= Delta;
             Tick?.Invoke(TickObj);
-            yield return new WaitForSeconds(Delta);
+            yield return new WaitForSecondsRealtime(Delta);
         }
         if (IsRunning)
         {

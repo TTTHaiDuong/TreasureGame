@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameItems;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -34,10 +35,26 @@ public class PlayUI : MonoBehaviour
 
     public void DisplayAchievements()
     {
-        ScoreTable.text = Player.Score.ToString();
-        GoldTable.text = Player.Gold.ToString();
+        ScoreTable.text = GetPlayersScore().ToString();
+        GoldTable.text = GetPlayersGold().ToString();
 
         SetBadge();
+    }
+
+    public int GetPlayersGold()
+    {
+        int gold = 0;
+        foreach (Gold item in Player.Bag.GetItems<Gold>())
+            gold += item.Count;
+        return gold;
+    }
+
+    public int GetPlayersScore()
+    {
+        int score = 0;
+        foreach (Score item in Player.Bag.GetItems<Score>())
+            score += item.Count;
+        return score;
     }
 
     private void OnBomb(object obj) => OnBombPanel.gameObject.SetActive(true);
@@ -45,9 +62,9 @@ public class PlayUI : MonoBehaviour
 
     public void SetBadge()
     {
-        if (Player.Score < 10) Badge.sprite = Badges[0];
-        else if (Player.Score < 20) Badge.sprite = Badges[1];
-        else if (Player.Score < 30) Badge.sprite = Badges[2];
+        if (GetPlayersScore() < 10) Badge.sprite = Badges[0];
+        else if (GetPlayersScore() < 20) Badge.sprite = Badges[1];
+        else if (GetPlayersScore() < 30) Badge.sprite = Badges[2];
     }
 
     public void RevivalCountdown(object obj)

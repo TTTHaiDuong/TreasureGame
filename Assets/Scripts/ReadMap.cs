@@ -10,7 +10,6 @@ using System;
 using TreasureGame;
 using System.Data;
 using System.Linq;
-using UnityEngine.Networking;
 
 namespace GameUI
 {
@@ -120,9 +119,8 @@ namespace GameUI
 
     //    public DataTable Execute(string query)
     //    {
-    //        Adapter = new SqlDataAdapter(query, Connection);
+    //        Adapter = new SqlDataAdapter(query, selectConnection: Connection);
     //        DataSet = new DataSet();
-    //        Adapter.Fill(DataSet);
 
     //        return DataSet.Tables[0];
     //    }

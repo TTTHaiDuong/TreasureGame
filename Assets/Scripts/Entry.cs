@@ -106,6 +106,11 @@ namespace TreasureGame
 
     public class ItemList : List<GameItem>
     {
+        public ItemList() : base()
+        {
+            ListChanged += RemoveEmptyItem;
+        }
+
         public delegate void Changed();
         private event Changed ListChanged;
 
@@ -156,6 +161,12 @@ namespace TreasureGame
         public void ListChangedListening(Changed changed)
         {
             if (!DelegateTool.ExistInside(ListChanged, changed)) ListChanged += changed;
+        }
+
+        private void RemoveEmptyItem()
+        {
+            for (int i = 0; i < Count; i++)
+                if (this[i].Count == 0) base.Remove(this[i]);
         }
 
         public void ListChangedRecall(Changed changed) => ListChanged -= changed;
@@ -327,7 +338,7 @@ namespace TreasureGame
         #region Block
         public const double HaveTimeToRecover = 0.6; // Truong hop random ra block can co thoi gian hoi phuc.
 
-        public const double IsTrap = 0.2; // Truong hop block co bom.
+        public const double IsTrap = 0.15; // Truong hop block co bom.
         public const double Golds = 0.1; // Truong hop block chi co vang.
         public const double Items = 0.1; // Truong hop block co item khac.
         public const double Questions = 0.2; // Truong hop block co cau hoi.

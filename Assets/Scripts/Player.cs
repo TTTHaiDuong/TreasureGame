@@ -10,8 +10,6 @@ using Unity.Netcode;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private int _Gold;
-    [SerializeField] private int _Score;
     [SerializeField] private string _Name;
     [SerializeField] private Animator Animator;
 
@@ -30,26 +28,6 @@ public class Player : MonoBehaviour
     {
         set => SetName(value);
         get => GetName();
-    }
-
-    public int Gold
-    {
-        set
-        {
-            _Gold = value;
-            PlayUI.DisplayPlayer(this);
-        }
-        get => _Gold;
-    }
-
-    public int Score
-    {
-        set
-        {
-            _Score = value;
-            PlayUI.DisplayPlayer(this);
-        }
-        get => _Score;
     }
 
     private void Awake()
@@ -105,19 +83,19 @@ public class Player : MonoBehaviour
         if (keyCaught) LivingTimer.Time = 0;
     }
 
-    public void GetItems(GameItem[] list)
-    {
-        foreach (GameItem item in list)
-        {
-            switch (item.GetType().Name)
-            {
-                case "Gold": Gold += item.Count; break;
-                case "Score": Score += item.Count; break;
-                case "TreasureMap": break;
-                default: Bag.Add(item); break;
-            }
-        }
-    }
+    //public void GetItems(GameItem[] list)
+    //{
+    //    foreach (GameItem item in list)
+    //    {
+    //        switch (item.GetType().Name)
+    //        {
+    //            case "Gold": Gold += item.Count; break;
+    //            case "Score": Score += item.Count; break;
+    //            case "TreasureMap": break;
+    //            default: Bag.Add(item); break;
+    //        }
+    //    }
+    //}
 
     public void SetName(string name)
     {

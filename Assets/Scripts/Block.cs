@@ -213,8 +213,9 @@ public class Block : MonoBehaviour
             {
                 if (item is Bomb bomb && bomb.IsReady)
                 {
-                    if (!Explosion.Timer.IsRunning)
-                        Explosion.Play(Explosion.Duration / 2, player.transform.position);
+                    Vector3 pos = transform.position;
+                    pos.y += 4.5f;
+                    Explosion.Play(Explosion.Duration / 2, pos);
 
                     player.LivingTimer.TickObj = "Bạn đã đào phải mìn!";
                     bomb.Active(bomb.Count, player);
@@ -284,8 +285,8 @@ public class Reward
         switch (ticket)
         {
             case "IsTrap":
-                Bomb bomb = new(1, (uint)rd.ChooseFromList(GameConst.Explosion));
-                bomb.IsReady = true;
+                Bomb bomb = new(1, (uint)rd.ChooseFromList(GameConst.Explosion))
+                { IsReady = true };
                 return new GameItem[] { bomb };
 
             case "Golds":

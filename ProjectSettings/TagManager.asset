@@ -13,6 +13,7 @@ TagManager:
   - Inventory
   - ReadMap
   - PartOfBody
+  - DataField
   layers:
   - Default
   - TransparentFX

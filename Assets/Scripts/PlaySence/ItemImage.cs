@@ -4,6 +4,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Netcode;
 
 namespace GameItems
 {
@@ -49,7 +50,7 @@ namespace GameItems
             return item.GetType().Name switch
             {
                 "Gold" => ItemSprites[0],
-                "Bomb" => ItemSprites[1],
+                "ThrownBomb" => ItemSprites[1],
                 "SuperShovel" => ItemSprites[2],
                 "Glasses" => ItemSprites[3],
                 "Map" => ItemSprites[4],
@@ -67,7 +68,7 @@ namespace GameItems
 
         public int Count;
         public abstract object Clone();
-    }   
+    }
 
     public class Bomb : GameItem
     {
@@ -114,15 +115,11 @@ namespace GameItems
     {
         public Glasses(int count = 0) : base(count) { }
 
-        public void Detect(Block block, Block[] setOfBlocks, int area)
+        public static void Detect(Block block, Block[] setOfBlocks, int area)
         {
-            if (Count > 0)
-            {
-                Count--;
-                Block[] areaDetected = DefineAround(block.transform.position, setOfBlocks, area);
-                foreach (Block detectBlock in areaDetected)
-                    if (BombDetection(detectBlock)) detectBlock.Text.SetText("!", 10);
-            }
+            Block[] areaDetected = DefineAround(block.transform.position, setOfBlocks, area);
+            foreach (Block detectBlock in areaDetected)
+                if (BombDetection(detectBlock)) detectBlock.Text.SetText("!", 10);
         }
 
         public static int CountOfBombsAround(Block block, Block[] setOfBlocks, int area)

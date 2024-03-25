@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using GameItems;
 using TMPro;
@@ -28,14 +26,14 @@ public class SelectedItem : MonoBehaviour
     public void OnUseItem()
     {
         UseItem.StartDrag(ItemImage);
-        Inventory.Open();
+        //Inventory.Open();
     }
 
     public string Describe(GameItem item)
     {
         return item.GetType().Name switch
         {
-            "Bomb" => "Được sử dụng để đặt bẫy cho một block. Hữu ích cho chế độ multi-player, dùng để bẫy người chơi khác.",
+            "ThrownBomb" => "Được sử dụng để đặt bẫy cho một block. Hữu ích cho chế độ multi-player, dùng để bẫy người chơi khác.",
             "Glasses" => "Được sử dụng để thăm dò đúng 9 block gần nhất, xem có mối nguy hiểm không.",
             "SuperShovel" => "Được sử dụng để đào một block chứa bẫy mà không phải chịu ảnh hưởng nào, hoặc bỏ qua thời gian hồi phục của block.",
             _ => ""
@@ -46,7 +44,7 @@ public class SelectedItem : MonoBehaviour
     {
         return item.GetType().Name switch
         {
-            "Bomb" => $"Số lượng: {item.Count}\nVụ nổ: {(item as Bomb).Explode}",
+            "ThrownBomb" => $"Số lượng: {item.Count}\nVụ nổ: {(item as Bomb).Explode}",
             "Glasses" => $"Số lượng: {item.Count}",
             "SuperShovel" => $"Số lượng: {item.Count}",
             _ => ""

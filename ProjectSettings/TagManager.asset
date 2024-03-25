@@ -14,6 +14,12 @@ TagManager:
   - ReadMap
   - PartOfBody
   - DataField
+  - ExplosionThrownBomb
+  - OnBombPanel
+  - ItemInventory
+  - OKButton
+  - CancelButton
+  - QuestionField
   layers:
   - Default
   - TransparentFX
@@ -50,4 +56,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UI
+    uniqueID: 2097266569
     locked: 0

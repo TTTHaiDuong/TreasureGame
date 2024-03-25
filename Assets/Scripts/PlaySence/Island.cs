@@ -1,20 +1,25 @@
+using GameUI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class Island : MonoBehaviour
 {
     public Block BaseBlock;
+    public bool Flag;
 
-    private void Start()
+    private void Update()
     {
-        InitIsland();
+        if (QuestionFactory.QuestionTable != null && !Flag) InitIsland();
     }
 
     public void InitIsland()
     {
+        Flag = true;
+
         float y = -1;
         foreach (Transform block in transform)
         {

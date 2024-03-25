@@ -1,179 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using TreasureGame;
-using TMPro;
 using GameItems;
 using GameUI;
-using Unity.VisualScripting;
-using System.Net.Sockets;
 using System.Linq;
-using UnityEditorInternal.Profiling.Memory.Experimental;
+using Unity.Netcode;
 
-//public class Block : MonoBehaviour
-//{
-//    public GameObject OriginTopBlock;
-
-//    public ReadMap ReadMap;
-//    public Explosion ExplosionParticle;
-//    public TextMeshProUGUI Text;
-//    public GameObject[] TopBlocks;
-//    public GameObject Display;
-
-//    public Timer RecoverTimer;
-//    public Timer InitTimer;
-//    public Timer TextTimer;
-
-//    public ItemList Secret;
-//    public bool IsDanger;
-
-//    private void Awake()
-//    {
-//        RecoverTimer = gameObject.AddComponent<Timer>();
-//        RecoverTimer.WhenFinish += AutoInit;
-
-//        InitTimer = gameObject.AddComponent<Timer>();
-//        InitTimer.WhenFinish += AutoInit;
-
-//        TextTimer = gameObject.AddComponent<Timer>();
-//        TextTimer.WhenFinish += ClearText;
-
-//        Secret = new();
-//    }
-
-//    private void Start()
-//    {
-//        RecoverTimer.TimeRemaining = 0;
-
-//        Vector3 explosionPosition = transform.position;
-//        explosionPosition.y += 4.5f;
-//        ExplosionParticle.transform.position = explosionPosition;
-
-//        Init();
-//    }
-
-//    public void Decorate(int type)
-//    {
-//        if (type == -1)
-//        {
-//            OriginTopBlock.SetActive(true);
-//            OriginTopBlock.GetComponent<TopBlock>().OnMouseExit();
-
-//            if (Display != null) Display.SetActive(false);
-//        }
-//        else
-//        {
-//            OriginTopBlock.SetActive(false);
-
-//            if (Display != null) Destroy(Display);
-//            Display = Instantiate(TopBlocks[type]);
-//            Display.SetActive(true);
-//            Display.transform.position = OriginTopBlock.transform.position;
-//        }
-//    }
-
-//    private void AutoInit(object obj)
-//    {
-//        SetBlockText("");
-//        Init();
-//    }
-
-//    private void ClearText(object obj)
-//    {
-//        Text.text = string.Empty;
-//    }
-
-//    public void DugUpBy(Player player)
-//    {
-//        if (!RecoverTimer.IsRunning)
-//        {
-//            Decorate(0);
-
-//            foreach (TreasureMap map in Secret.GetItems<TreasureMap>())
-//            {
-//                if (map.Pass) continue;
-//                else
-//                {
-//                    InitTimer.TimeRemaining += map.Time + 10;
-//                    ReadMap.Read(player, map);
-//                    return;
-//                }
-//            }
-
-//            if (IsDanger)
-//            {
-//                player.RevivalTimer.TickParameter = "Bạn đã đào phải mìn!";
-//                ExplosionParticle.Play(ExplosionParticle.Duration / 2);
-
-//                Bomb[] bombs = Secret.GetItems<Bomb>();
-//                foreach (Bomb bomb in bombs)
-//                {
-//                    bomb.Active(bomb.Count, player);
-//                    Secret.Remove(bomb);
-//                }
-//            }
-
-//            player.GetItems(Secret);
-
-//            Island island = transform.parent.GetComponent<Island>();
-//            Block[] blocks = island.GetAllBlocks();
-//            SetBlockText(Glasses.CountOfBombsAround(this, blocks, 9).ToString(), 10);
-
-//            if (new GameRandom().Probability(GameConst.HaveTimeToRecover))
-//                RecoverTimer.Counting(new GameRandom().Next(GameConst.RecoverInterval));
-//            else RecoverTimer.Counting(20);
-//            InitTimer.Break();
-
-//            IsDanger = false;
-//        }
-//    }
-
-//    public void SetBlockText(string text, float second = 0)
-//    {
-//        Text.text = text;
-//        if (second != 0) TextTimer.Counting(second);
-//    }
-
-//    public void Init()
-//    {
-//        Decorate(-1);
-
-//        GameRandom rd = new();
-//        Secret = new();
-//        IsDanger = false;
-
-//        if (rd.Probability(GameConst.IsTrap))
-//        {
-//            IsDanger = true;
-//            Bomb bomb = new(1, (uint)rd.ChooseFromList<int>(GameConst.Explosion));
-//            Secret.Add(bomb);
-//        }
-//        else if (rd.Probability(GameConst.Golds))
-//        {
-//            Gold gold = new(rd.Next(GameConst.Funds));
-//            Secret.Add(gold);
-//        }
-//        else if (rd.Probability(GameConst.Items))
-//        {
-//            List<GameItem> gameItems = new()
-//            {
-//                new Bomb(1, (uint)rd.ChooseFromList<int>(GameConst.Explosion)),
-//                new Glasses(1),
-//                new SuperShovel(1)
-//            };
-//            Secret.Add(rd.ChooseFromList(gameItems.ToArray()));
-//        }
-//        else if (rd.Probability(GameConst.Questions))
-//        {
-//            TreasureMap map = new("", "", 2);
-//            Secret.Add(map);
-//        }
-
-//        InitTimer.Counting(new GameRandom().Next(GameConst.InitInterval));
-//        RecoverTimer.Break();
-//    }
-//}
-
-public class Block : MonoBehaviour
+public class Block : MonoBehaviour, INetworkSerializable
 {
     [SerializeField] private List<TopBlock> List;
 
@@ -190,6 +23,8 @@ public class Block : MonoBehaviour
 
     private void Awake()
     {
+        QuestionFactory init = new();
+
         RecoverTimer = gameObject.AddComponent<Timer>();
         InitTimer = gameObject.AddComponent<Timer>();
 
@@ -223,27 +58,31 @@ public class Block : MonoBehaviour
         {
             if (item is Bomb bomb && bomb.IsReady)
             {
-                Vector3 pos = transform.position;
-                pos.y += 4.5f;
-                Explosion.Play(Explosion.Duration / 2, pos);
-
+                ActiveExplosion();
                 player.LivingTimer.TickObj = "Bạn đã đào phải mìn!";
                 bomb.Active(bomb.Count, player);
             }
             else if (item is Map map && !map.Pass)
             {
-                FloatingItem.Floating(item);
+                FloatingItem.SetUp(item);
                 ReadMap.Display(player, map);
 
                 return true;
             }
             else
             {
-                player.Bag.Add(item);
+                //player.Bag.Add(item);
             }
         }
         Secret.Clear();
         return false;
+    }
+
+    public void ActiveExplosion()
+    {
+        Vector3 pos = transform.position;
+        pos.y += 4.5f;
+        Explosion.Play(Explosion.Duration / 2, pos);
     }
 
     public void DetectBombAround(int area)
@@ -276,6 +115,21 @@ public class Block : MonoBehaviour
 
         Secret = new();
         Secret.AddRange((GameItem[])new GameRandom().Probability(suprisingThings.ToArray()));
+
+        foreach (GameItem item in Secret) Debug.Log(item.GetType().Name);
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref InitTimer);
+        serializer.SerializeValue(ref RecoverTimer);
+
+    }
+
+    public void NetworkDeserialize(Block block)
+    {
+        InitTimer.NetworkDeserialize(block.InitTimer);
+        RecoverTimer.NetworkDeserialize(block.RecoverTimer);
     }
 }
 
@@ -311,7 +165,7 @@ public class Reward
                 return new GameItem[] { rd.ChooseFromList(gameItems.ToArray()) };
 
             case "Questions":
-                Map map = new("Bạn tên là gì?", "A", "B", "C", "D");
+                Map map = QuestionFactory.GetQuestion();
                 return new GameItem[] { map };
 
             default:
@@ -338,7 +192,7 @@ public class DecoratedTopBlocks : List<TopBlock>
         Clear();
         foreach (TopBlock block in list)
         {
-            TopBlock clone = GameObject.Instantiate(block);
+            TopBlock clone = Object.Instantiate(block);
             clone.transform.SetParent(Origin.transform);
             clone.transform.position = Position;
             clone.gameObject.SetActive(false);

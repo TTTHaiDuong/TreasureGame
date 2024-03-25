@@ -1,7 +1,6 @@
 ﻿using GameUI;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
+using TreasureGame;
 using UnityEngine;
 
 public class MultipleChoice : MonoBehaviour
@@ -18,9 +17,17 @@ public class MultipleChoice : MonoBehaviour
     [SerializeField] private TextMeshProUGUI Choice3;
     [SerializeField] private TextMeshProUGUI Choice4;
 
+    public Timer Timer;
     private string[] Choices;
     private Player Player;
     private Map Map;
+
+    private void Awake()
+    {
+        Timer = new GameObject().AddComponent<Timer>();
+        Timer.TickListening(CountDown);
+        Timer.FinishListening(Penalty);
+    }
 
     private void Update()
     {
@@ -29,18 +36,27 @@ public class MultipleChoice : MonoBehaviour
 
     public void Display(Player player, Map map)
     {
-        Player = player;
-        Map = map;
+        if (map == null) return;
+        if (Map != map)
+        {
+            Clear();
+            Player = player;
+            Map = map;
 
-        Question.text = Map.GetQuestion(out Choices);
-        Choice1.text = Choices[0];
-        Choice2.text = Choices[1];
-        Choice3.text = Choices[2];
-        Choice4.text = Choices[3];
+            Question.text = Map.GetQuestion(out Choices);
+            Choice1.text = Choices[0];
+            Choice2.text = Choices[1];
+            Choice3.text = Choices[2];
+            Choice4.text = Choices[3];
 
-        if (Map.Penalty) Warning.gameObject.SetActive(true);
-        Map.Timer.TickListening(CountDown);
+            if (new GameRandom().Probability(0.3) && Timer != null && !Timer.IsRunning)
+            {
+                Warning.gameObject.SetActive(true);
+                Timer.Play(new GameRandom().Next(10, 20));
+            }
+        }
 
+        Player.IsActive = false;
         gameObject.SetActive(true);
     }
 
@@ -77,35 +93,38 @@ public class MultipleChoice : MonoBehaviour
 
     private void RightAnswer()
     {
-        Player.Bag.AddRange(Map.Reward);
+        Timer.Break();
+        Player.Score += new GameRandom().Next(5, 10);
+        RemoveMap();
         Exit();
     }
 
     private void WrongAnswer()
     {
-        if (Map.Penalty)
-        {
-            Player.LivingTimer.TickObj = "Trả lời câu hỏi không chính xác!";
-            Player.Exploded(5);
-        }
-        Map.Pass = true;
+        RemoveMap();
+        Exit();
+    }
 
+    private void Penalty(object obj)
+    {
+        Player.LivingTimer.TickObj = "Trả lời câu hỏi không chính xác!";
+        Player.Exploded(5);
+        Player.Score -= new GameRandom().Next(1, 4);
+        Player.BlockUnderFoot().ActiveExplosion();
+        Timer.Break();
+        RemoveMap();
         Exit();
     }
 
     private void CountDown(object obj)
     {
-        LimitedTime.text = $"Còn: {Map.Timer.Time}";
-        if (Map.Timer.Time == 0)
-        {
-            WrongAnswer();
-            Map.Timer.Recall();
-        }
+        LimitedTime.text = $"Còn: {Timer.Time}";
     }
 
     public void Exit()
     {
         Clear();
+        Player.IsActive = true;
         gameObject.SetActive(false);
         ReadMap.Exit();
     }
@@ -113,5 +132,14 @@ public class MultipleChoice : MonoBehaviour
     private void ExitKey(bool keyInput)
     {
         if (keyInput) Exit();
+    }
+
+    private void RemoveMap()
+    {
+        if (Map != null)
+        {
+            Map.Pass = true;
+            Map = null;
+        }
     }
 }

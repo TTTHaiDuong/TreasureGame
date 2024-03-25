@@ -1,63 +1,13 @@
-﻿using JetBrains.Annotations;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Threading;
-using Unity.VisualScripting;
-using UnityEngine;
 using GameItems;
-using UnityEngine.SocialPlatforms;
-using GameUI;
-using Newtonsoft.Json;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using static UnityEditor.Progress;
-using System.Security.Cryptography;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace TreasureGame
 {
-    public class Entry : MonoBehaviour
-    {
-        public Inventory Inventory;
-        public GameObject Answer;
-        public Explosion Explosion;
-        public ReadMap ReadMap;
-
-        // Update is called once per frame
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.P)) Explosion.Play(Explosion.Duration / 2);
-            
-            if (Input.GetKeyDown(KeyCode.I) && !Answer.activeSelf)
-            {
-                Inventory.Open();
-            }
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-
-            }
-
-            if (Input.GetKey(KeyCode.LeftControl))
-            {
-                if ((Input.GetKeyDown(KeyCode.Equals) || Input.GetKeyDown(KeyCode.KeypadPlus)) && Camera.main.fieldOfView >= 6)
-                {
-                    Camera.main.fieldOfView -= 1;
-                }
-                if ((Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus)) && Camera.main.fieldOfView <= 39)
-                {
-                    Camera.main.fieldOfView += 1;
-                }
-            }
-        }
-
-        public void InitNonMonoBehaviours()
-        {
-
-        }
-    }
-
     public class ObjectComparable
     {
         public static bool Compare(object obj1, object obj2, params string[] ignore)
@@ -176,99 +126,6 @@ namespace TreasureGame
         public void ListChangedRecall(Changed changed) => ListChanged -= changed;
     }
 
-    //public class ItemsList : List<GameItem>, ICloneable
-    //{
-    //    public void AddGroup(GameItem newItem)
-    //    {
-    //        int count = newItem.Count;
-    //        for (int i = 0; i < Count; i++)
-    //        {
-    //            newItem.Count = this[i].Count;
-    //            if (this[i].Compare(newItem))
-    //            {
-    //                this[i].Count += count;
-    //                return;
-    //            }
-    //        }
-    //        newItem.Count = count;
-    //        Add(newItem);
-    //    }
-
-    //    public void Shrink()
-    //    {
-    //        List<GameItem> items = new();
-    //        for (int i = 0; i < Count; i++)
-    //        {
-    //            if (items.Count == 0 || items[Count - 1].GetType() != this[i].GetType())
-    //            {
-    //                var invokeGetItems = GetType().GetMethod("GetItems").MakeGenericMethod(this[i].GetType());
-    //                items.AddRange(invokeGetItems.Invoke(this, new object[] { }) as GameItem[]);
-    //                i = items.Count;
-    //            }
-    //        }
-    //        Clear();
-    //        AddRange(items);
-    //    }
-
-    //    public T[] GetItems<T>()
-    //    {
-    //        List<T> result = new();
-    //        foreach (GameItem item in this)
-    //            if (item is T necessaryItem) result.Add(necessaryItem);
-
-    //        for (int i = 1; i < result.Count; i++)
-    //        {
-    //            GameItem key = result[i] as GameItem;
-    //            int j = i - 1;
-    //            while (j >= 0)
-    //            {
-    //                GameItem ignoreCount = (result[j] as GameItem).Clone() as GameItem;
-    //                ignoreCount.Count = key.Count;
-    //                if (ignoreCount.Compare(key))
-    //                {
-    //                    GameItem addCount = result[j] as GameItem;
-    //                    addCount.Count += key.Count;
-    //                    result.RemoveAt(i);
-    //                    break;
-    //                }
-    //                j--;
-    //            }
-    //        }
-    //        return result.ToArray();
-    //    }
-
-    //    public static bool operator !=(ItemsList a, ItemsList b) => !(a == b);
-    //    public static bool operator ==(ItemsList a, ItemsList b)
-    //    {
-    //        bool nullA = false;
-    //        bool nullB = false;
-    //        try { _ = a.Count; } catch (NullReferenceException) { nullA = true; }
-    //        try { _ = b.Count; } catch (NullReferenceException) { nullB = true; }
-
-    //        if (nullA && nullB) return true;
-    //        else if (nullB || nullB) return false;
-
-    //        if (a.Count != b.Count) return false;
-    //        else
-    //        {
-    //            for (int i = 0; i < b.Count; i++)
-    //                if (!a[i].Compare(b[i])) return false;
-    //            return true;
-    //        }
-    //    }
-
-    //    public override bool Equals(object obj) => base.Equals(obj);
-    //    public override int GetHashCode() => base.GetHashCode();
-    //    public object Clone()
-    //    {
-    //        ItemsList clone = new();
-    //        foreach (GameItem item in this)
-    //            clone.Add(item.Clone() as GameItem);
-    //        return clone;
-    //    }
-    //}
-
-
     public delegate void TreasureHunt();
 
     public class GameRandom : System.Random
@@ -281,13 +138,13 @@ namespace TreasureGame
 
         public bool Probability(double ratio)
         {
-            int[] fraction = ConvertToFraction(ratio);
+            int[] fraction = ToFraction(ratio);
             int i = Next(fraction[1]);
             if (i < fraction[0]) return true;
             else return false;
         }
 
-        public int[] ConvertToFraction(double number)
+        public int[] ToFraction(double number)
         {
             const double epsilon = 1e-10;
             int maxDenominator = 100000;
@@ -303,6 +160,9 @@ namespace TreasureGame
             return new int[] { (int)Math.Round(number), 1 };
         }
 
+        /// <summary>
+        /// Chọn một phần tử bất kỳ trong một mảng.
+        /// </summary>
         public T ChooseFromList<T>(params T[] array) => array[Next(array.Length)];
 
         public object Probability(params KeyValuePair<object, double>[] weightedObjects)
@@ -316,14 +176,16 @@ namespace TreasureGame
             foreach (KeyValuePair<object, double> weightedObject in weightedObjects)
             {
                 if (randomWeight < weightedObject.Value) return weightedObject.Key;
-                
+
                 randomWeight -= weightedObject.Value;
             }
 
-            Debug.Log("Nullll");
             return null;
         }
 
+        /// <summary>
+        /// Xáo trộn các phần tử trong một mảng.
+        /// </summary>
         public void Shuffle<T>(T[] array)
         {
             int n = array.Length;
@@ -334,6 +196,91 @@ namespace TreasureGame
                 int k = Next(n + 1);
                 (array[n], array[k]) = (array[k], array[n]);
             }
+        }
+    }
+
+    /// <summary>
+    /// Làm việc trực tiếp, truy xuất Database.
+    /// </summary>
+    public class DatabaseManager
+    {
+        public delegate void FailedConnectToServer(object obj);
+        public static FailedConnectToServer FailedConnect;
+
+        public static int ConnectionTime = 10000;
+
+        private const string ConnectionString = @"Data source=DUONG\HAIDUONG;Initial Catalog=TREASUREGAME;Integrated Security = True";
+
+        #region Account
+        public const string AccountTableName = "ACCOUNT";
+        public const string AccountEmailColumnName = "EMAIL";
+        public const string AccountPasswordColumnName = "PASSWORD";
+        #endregion
+
+        #region Student
+        public const string StudentTableName = "PLAYER";
+        public const string StudentIdColumn = "STUDENTID";
+        public const string StudentNameColumn = "NAME";
+        public const string StudentScoreColumn = "SCORE";
+        public const string StudentAttendanceColumn = "ATTENDANCE";
+        #endregion
+
+        #region Questions
+        public const string QuestionsTableName = "QUESTION";
+        public const string QuestionColumn = "QUESTION";
+        #endregion
+
+        public static DataTable ExecuteQuery(string query)
+        {
+            DataTable table = new();
+            using (SqlConnection connection = new(ConnectionString))
+            {
+                using (SqlCommand command = new(query, connection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        SqlDataAdapter adapter = new(command);
+                        adapter.Fill(table);
+                    }
+                    catch (SqlException)
+                    {
+                        FailedConnect?.Invoke("");
+                    }
+                }
+            }
+            return table;
+        }
+
+        public static DataTable ExecuteQuery(string query, string parameter, string value)
+        {
+            return ExecuteQuery(query, new string[] { parameter }, new string[] { value });
+        }
+
+        public static DataTable ExecuteQuery(string query, string[] parameters, string[] values)
+        {
+            DataTable table = new();
+            using (SqlConnection connection = new(ConnectionString))
+            {
+                using (SqlCommand command = new(query, connection))
+                {
+                    try
+                    {
+                        if (parameters != null)
+                        for (int i = 0; i < parameters.Length; i++)
+                            command.Parameters.AddWithValue(parameters[i], values[i]);
+
+                        connection.Open();
+                        SqlDataAdapter adapter = new(command);
+                        adapter.Fill(table);
+                    }
+                    catch (SqlException)
+                    {
+                        FailedConnect?.Invoke("");
+                    }
+                }
+            }
+            return table;
         }
     }
 

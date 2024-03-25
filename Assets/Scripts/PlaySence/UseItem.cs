@@ -1,11 +1,8 @@
 using GameItems;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UseItem : MonoBehaviour
+public class UseItem : MonoBehaviour, IInitOwnerComponent
 {
     public Player Player;
     public ItemImage ItemImage;
@@ -14,7 +11,7 @@ public class UseItem : MonoBehaviour
 
     void Update()
     {
-        transform.forward = Camera.main.transform.forward;
+        transform.forward = Player.PlayerCamera.transform.forward;
         PositionMatching();
         UseOnGetKey(Input.GetMouseButtonDown(0));
         CancelUseItem(Input.GetKeyDown(KeyCode.Escape));
@@ -75,7 +72,7 @@ public class UseItem : MonoBehaviour
         Block block = DefineBlock(transform.position);
         switch (item.GetType().Name)
         {
-            case "Bomb":
+            case "ThrownBomb":
                 Bomb bomb = item as Bomb;
                 bomb.IsReady = true;
                 block.Decoration.Decorate(DecoratedBlock.New);
@@ -85,12 +82,20 @@ public class UseItem : MonoBehaviour
                 break;
 
             case "Glasses":
-                if (item is Glasses glasses) 
-                    glasses.Detect(block, Island.GetAllBlocks(), 9);
                 break;
 
             case "SuperShovel":
                 break;
         }
+    }
+
+    public void SetOwner(Player player)
+    {
+        Player = player;
+    }
+
+    public void RemoveOwner(Player player)
+    {
+        Player = null;
     }
 }

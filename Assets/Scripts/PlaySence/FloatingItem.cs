@@ -1,15 +1,11 @@
 using GameItems;
-using GameUI;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class FloatingItem : MonoBehaviour
 {
     private HarmonicOscillation Osc;
-    private Vector3 Root;
+    private Vector3 OriginalPosition;
 
     [SerializeField] private ItemImage ItemImage;
     [SerializeField] private Image Image;
@@ -21,10 +17,10 @@ public class FloatingItem : MonoBehaviour
     {
         Osc = new(0.2f, 5);
         RectImage = Image.GetComponent<RectTransform>();
-        Root = RectImage.anchoredPosition;
+        OriginalPosition = RectImage.anchoredPosition;
     }
 
-    void Update()
+    private void Update()
     {
         Image.transform.forward = Camera.main.transform.forward;
         Oscillation();
@@ -32,19 +28,19 @@ public class FloatingItem : MonoBehaviour
 
     private void Oscillation()
     {
-        Vector3 pos = Root;
-        pos.y = Osc.Turn(Time.deltaTime) + Root.y;
+        Vector3 pos = OriginalPosition;
+        pos.y = Osc.Turn(Time.deltaTime) + OriginalPosition.y;
         RectImage.anchoredPosition = pos;
     }
 
-    public void Floating(ItemImage item)
+    public void SetUp(ItemImage item)
     {
         Image.sprite = item.Image.sprite;
         Item = item.Item.Clone() as GameItem;
         gameObject.SetActive(true);
     }
 
-    public void Floating(GameItem item)
+    public void SetUp(GameItem item)
     {
         Image.sprite = ItemImage.GetSprite(item);
         Item = item.Clone() as GameItem;

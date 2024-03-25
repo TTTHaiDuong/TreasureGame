@@ -1,26 +1,41 @@
 ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
-    - BackpackClick
+    - AnimationHandler
     - Block
+    - CloseToExplosion
+    - EndOfTheGame
     - Explosion
-    - Flag
+    - ExplosionThrownBomb
+    - FloatingItem
     - FlyText
     - GameItems.ItemImage
     - GameUI.Inventory
     - GameUI.ReadMap
     - Island
-    - NetworkButtonsClick
-    - PlayUI
+    - ItemInventory
+    - ItemsBar
+    - ItemsBarInside
+    - LogOut
+    - Login
+    - MainCamera
+    - MultiplayerDebug
+    - MultipleChoice
+    - OnBomb
+    - PartsOfBody
     - Player
-    - ProgressBar
-    - SelectedItem
+    - PlayerCount
+    - RoomIdField
+    - SceneManager
+    - ScoreTable
+    - TextOfBlock
+    - ThrownBomb
+    - TimeCountDown
     - TopBlock
-    - TreasureGame.Entry
     - UseItem
+    - WaitingPlayerList
+    - WaitingRoom
     - Warning
-    Unity.Netcode.Components.dll:
-    - Unity.Netcode.Components.NetworkTransform
     Unity.Netcode.Editor.dll:
     - Unity.Netcode.Editor.Configuration.NetcodeForGameObjectsProjectSettings
     Unity.Netcode.Runtime.dll:
@@ -45,8 +60,10 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
+    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
+    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
@@ -65,6 +82,7 @@ ScriptsOnlyBuild:
   serializedClasses:
     Unity.Netcode.Runtime:
     - Unity.Netcode.NetworkConfig
+    - Unity.Netcode.NetworkPrefab
     - Unity.Netcode.NetworkPrefabs
     - Unity.Netcode.Transports.UTP.UnityTransport/ConnectionAddressData
     - Unity.Netcode.Transports.UTP.UnityTransport/SimulatorParameters
@@ -119,19 +137,55 @@ ScriptsOnlyBuild:
     - UnityEngine.UIElements.StyleValueHandle
   methodsToPreserve:
   - assembly: Assembly-CSharp
+    fullTypeName: WaitingRoom
+    methodName: SetName
+  - assembly: Assembly-CSharp
+    fullTypeName: MultipleChoice
+    methodName: Button2
+  - assembly: Assembly-CSharp
     fullTypeName: Warning
     methodName: OnPointedEnter
   - assembly: Assembly-CSharp
     fullTypeName: Warning
     methodName: OnPointedExit
   - assembly: Assembly-CSharp
-    fullTypeName: SelectedItem
-    methodName: OnUseItem
+    fullTypeName: WaitingRoom
+    methodName: SendStartToPlayServerRpc
   - assembly: Assembly-CSharp
-    fullTypeName: BackpackClick
-    methodName: OnPointerClick
+    fullTypeName: Warning
+    methodName: OnPointedEnter
+  - assembly: Assembly-CSharp
+    fullTypeName: Warning
+    methodName: OnPointedExit
+  - assembly: Assembly-CSharp
+    fullTypeName: MultipleChoice
+    methodName: Button1
+  - assembly: Assembly-CSharp
+    fullTypeName: SceneManager
+    methodName: LogOut
+  - assembly: Assembly-CSharp
+    fullTypeName: MultiplayerDebug
+    methodName: HostClick
+  - assembly: Assembly-CSharp
+    fullTypeName: MultipleChoice
+    methodName: Button4
+  - assembly: Assembly-CSharp
+    fullTypeName: MultiplayerDebug
+    methodName: ClientClick
+  - assembly: Assembly-CSharp
+    fullTypeName: MultiplayerDebug
+    methodName: ServerClick
+  - assembly: Assembly-CSharp
+    fullTypeName: Login
+    methodName: SubmitClick
+  - assembly: Assembly-CSharp
+    fullTypeName: MultipleChoice
+    methodName: Button3
+  - assembly: Assembly-CSharp
+    fullTypeName: SceneManager
+    methodName: ReturnToWaitingRoom
   sceneClasses:
-    Assets/Scenes/SampleScene.unity:
+    Assets/Scenes/PlaySence.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -151,6 +205,8 @@ ScriptsOnlyBuild:
     - Class: 48
       Script: {instanceID: 0}
     - Class: 49
+      Script: {instanceID: 0}
+    - Class: 54
       Script: {instanceID: 0}
     - Class: 64
       Script: {instanceID: 0}
@@ -183,82 +239,120 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1640}
     - Class: 114
-      Script: {instanceID: 1694}
+      Script: {instanceID: 1706}
     - Class: 114
-      Script: {instanceID: 1866}
+      Script: {instanceID: 1902}
     - Class: 114
-      Script: {instanceID: 2482}
+      Script: {instanceID: 2642}
     - Class: 114
-      Script: {instanceID: 2496}
+      Script: {instanceID: 2708}
     - Class: 114
-      Script: {instanceID: 2562}
+      Script: {instanceID: 2714}
     - Class: 114
-      Script: {instanceID: 2702}
+      Script: {instanceID: 2890}
     - Class: 114
-      Script: {instanceID: 3102}
+      Script: {instanceID: 2916}
     - Class: 114
-      Script: {instanceID: 3236}
+      Script: {instanceID: 3358}
     - Class: 114
-      Script: {instanceID: 3392}
+      Script: {instanceID: 3454}
     - Class: 114
-      Script: {instanceID: 3814}
+      Script: {instanceID: 3512}
     - Class: 114
-      Script: {instanceID: 3856}
+      Script: {instanceID: 3558}
     - Class: 114
-      Script: {instanceID: 4114}
+      Script: {instanceID: 3692}
     - Class: 114
-      Script: {instanceID: 4178}
+      Script: {instanceID: 4198}
     - Class: 114
-      Script: {instanceID: 4528}
+      Script: {instanceID: 4554}
     - Class: 114
-      Script: {instanceID: 5224}
+      Script: {instanceID: 4628}
     - Class: 114
-      Script: {instanceID: 5244}
+      Script: {instanceID: 5034}
     - Class: 114
-      Script: {instanceID: 5542}
+      Script: {instanceID: 5860}
     - Class: 114
-      Script: {instanceID: 5604}
+      Script: {instanceID: 5884}
     - Class: 114
-      Script: {instanceID: 5828}
+      Script: {instanceID: 6204}
     - Class: 114
-      Script: {instanceID: 6032}
+      Script: {instanceID: 6254}
     - Class: 114
-      Script: {instanceID: 6274}
+      Script: {instanceID: 6334}
     - Class: 114
-      Script: {instanceID: 6332}
+      Script: {instanceID: 6596}
     - Class: 114
-      Script: {instanceID: 6608}
+      Script: {instanceID: 6682}
     - Class: 114
-      Script: {instanceID: 7546}
+      Script: {instanceID: 6828}
     - Class: 114
-      Script: {instanceID: 7622}
+      Script: {instanceID: 7104}
     - Class: 114
-      Script: {instanceID: 7984}
+      Script: {instanceID: 7122}
     - Class: 114
-      Script: {instanceID: 8020}
+      Script: {instanceID: 7192}
     - Class: 114
-      Script: {instanceID: 8394}
+      Script: {instanceID: 7528}
     - Class: 114
-      Script: {instanceID: 8744}
+      Script: {instanceID: 7716}
     - Class: 114
-      Script: {instanceID: 8790}
+      Script: {instanceID: 7912}
     - Class: 114
-      Script: {instanceID: 8902}
+      Script: {instanceID: 7996}
     - Class: 114
-      Script: {instanceID: 8968}
+      Script: {instanceID: 8488}
     - Class: 114
-      Script: {instanceID: 9044}
+      Script: {instanceID: 8674}
     - Class: 114
-      Script: {instanceID: 9422}
+      Script: {instanceID: 8752}
     - Class: 114
-      Script: {instanceID: 9986}
+      Script: {instanceID: 8870}
     - Class: 114
-      Script: {instanceID: 10216}
+      Script: {instanceID: 9022}
     - Class: 114
-      Script: {instanceID: 10324}
+      Script: {instanceID: 9164}
+    - Class: 114
+      Script: {instanceID: 9220}
+    - Class: 114
+      Script: {instanceID: 9886}
+    - Class: 114
+      Script: {instanceID: 10158}
+    - Class: 114
+      Script: {instanceID: 10284}
+    - Class: 114
+      Script: {instanceID: 10368}
+    - Class: 114
+      Script: {instanceID: 10434}
+    - Class: 114
+      Script: {instanceID: 10458}
+    - Class: 114
+      Script: {instanceID: 10890}
+    - Class: 114
+      Script: {instanceID: 11226}
+    - Class: 114
+      Script: {instanceID: 11544}
+    - Class: 114
+      Script: {instanceID: 12194}
+    - Class: 114
+      Script: {instanceID: 12198}
+    - Class: 114
+      Script: {instanceID: 12206}
+    - Class: 114
+      Script: {instanceID: 28806}
+    - Class: 114
+      Script: {instanceID: 32494}
+    - Class: 114
+      Script: {instanceID: 32510}
+    - Class: 114
+      Script: {instanceID: 32564}
+    - Class: 114
+      Script: {instanceID: 115332}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
+      Script: {instanceID: 0}
+    - Class: 135
       Script: {instanceID: 0}
     - Class: 157
       Script: {instanceID: 0}
@@ -275,6 +369,8 @@ ScriptsOnlyBuild:
     - Class: 223
       Script: {instanceID: 0}
     - Class: 224
+      Script: {instanceID: 0}
+    - Class: 225
       Script: {instanceID: 0}
   scriptHashData:
   - hash:
@@ -327,10 +423,22 @@ ScriptsOnlyBuild:
     className: Selectable
   - hash:
       serializedVersion: 2
+      Hash: c2e17d77d48bdfa31d7c40464bc5df0d
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: 
+    className: EditorChildSceneLoader
+  - hash:
+      serializedVersion: 2
       Hash: cdbf629ac32f9205d78041dd435d1f6e
     assemblyName: Unity.Netcode.Runtime
     namespaceName: Unity.Netcode.Transports.UTP
     className: SecretsLoaderHelper
+  - hash:
+      serializedVersion: 2
+      Hash: 4be8a9ea0cd2dac7117cea2abd412e78
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: DataGridView
   - hash:
       serializedVersion: 2
       Hash: 8703b6ae2b0eefd9dafbc44d8d333fb1
@@ -363,16 +471,16 @@ ScriptsOnlyBuild:
     className: UnityOnTriggerEnterMessageListener
   - hash:
       serializedVersion: 2
+      Hash: 80b07ae2e45c645a6fd8f7b11768f2a4
+    assemblyName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
+    namespaceName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
+    className: ClientNetworkTransform
+  - hash:
+      serializedVersion: 2
       Hash: 0c6de72eaf8c1070da824268c4bfad9d
     assemblyName: Unity.TextMeshPro
     namespaceName: TMPro
     className: TMP_StyleSheet
-  - hash:
-      serializedVersion: 2
-      Hash: 802ef9e3694e4f6313768f2264acdef6
-    assemblyName: Assembly-CSharp
-    namespaceName: TreasureGame
-    className: Entry
   - hash:
       serializedVersion: 2
       Hash: ad49e20f31ed572e586aa8bbaafb591b
@@ -387,10 +495,10 @@ ScriptsOnlyBuild:
     className: UnityOnPointerUpMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 7827107379afa04394248644b511aa9e
-    assemblyName: Unity.Netcode.Runtime
-    namespaceName: Unity.Netcode.Transports.UTP
-    className: UnityTransport
+      Hash: 641d1d914c387f0f79e65902998de55f
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: OnBomb
   - hash:
       serializedVersion: 2
       Hash: 7e93247d600e115dac0cdd880de94e99
@@ -405,16 +513,34 @@ ScriptsOnlyBuild:
     className: UnityOnJointBreakMessageListener
   - hash:
       serializedVersion: 2
+      Hash: 7827107379afa04394248644b511aa9e
+    assemblyName: Unity.Netcode.Runtime
+    namespaceName: Unity.Netcode.Transports.UTP
+    className: UnityTransport
+  - hash:
+      serializedVersion: 2
       Hash: 1ab136900c0edaeeb49424c852595030
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
     className: RawImage
   - hash:
       serializedVersion: 2
-      Hash: 0dbafb9b0e9c3755672900738e7de57d
+      Hash: d62906ff3e178201d33ff983a8698f30
     assemblyName: Assembly-CSharp
     namespaceName: GameUI
     className: Inventory
+  - hash:
+      serializedVersion: 2
+      Hash: 13cd48f2ffcf6c77ce3b526965d70219
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: MultipleChoice
+  - hash:
+      serializedVersion: 2
+      Hash: 4b2325a6cb73414b1cdf7fa93aa1a8af
+    assemblyName: Unity.Multiplayer.Samples.Utilities.RNSM
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: NetStatsMonitorCustomization
   - hash:
       serializedVersion: 2
       Hash: ff086b2fc4609f8b094e7c0435c6db0a
@@ -459,10 +585,22 @@ ScriptsOnlyBuild:
     className: AudioTrack
   - hash:
       serializedVersion: 2
+      Hash: ce049da627500942a2c1505f588afa77
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: NetworkHub
+  - hash:
+      serializedVersion: 2
       Hash: ada873da50974d1e7ce247ffb296b0f3
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnCollisionEnterMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: e61b8a3bcb1b0d36b3ab656f936ed3be
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: PlayerCount
   - hash:
       serializedVersion: 2
       Hash: 7e12302f66e3c8ed5bcfea4ce65fccea
@@ -471,16 +609,22 @@ ScriptsOnlyBuild:
     className: UnityMessageListener
   - hash:
       serializedVersion: 2
-      Hash: afec2168520c1a25528d7452a0ec7ef1
+      Hash: 87011a565110fa6a015cc7a52dbe83e6
     assemblyName: Assembly-CSharp
     namespaceName: 
-    className: Player
+    className: MultiplayerDebug
   - hash:
       serializedVersion: 2
       Hash: a0e0bc431a5a05794fcf44452b3eb06a
     assemblyName: Unity.Multiplayer.Tools.NetStatsMonitor.Configuration
     namespaceName: Unity.Multiplayer.Tools.NetStatsMonitor
     className: NetStatsMonitorConfiguration
+  - hash:
+      serializedVersion: 2
+      Hash: fd0186cd17e442da20f8c78527424798
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ItemInventory
   - hash:
       serializedVersion: 2
       Hash: fce9b835d1e8b08e7ecea8da19f21986
@@ -543,10 +687,22 @@ ScriptsOnlyBuild:
     className: TestResultRendererCallback
   - hash:
       serializedVersion: 2
+      Hash: dfb6913502ec81bb8fa5c3492539ab21
+    assemblyName: Unity.Multiplayer.Samples.Utilities.RNSM
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: AutoHide
+  - hash:
+      serializedVersion: 2
       Hash: b98001682cba83786775c9e415b89a61
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnDropdownValueChangedMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: a600e45f4803338e1f942aee7817894a
+    assemblyName: Unity.Services.Relay
+    namespaceName: Unity.Services.Relay.Scheduler
+    className: TaskSchedulerThreaded
   - hash:
       serializedVersion: 2
       Hash: a1ac4c50e55874de16eee3db71aa9784
@@ -559,6 +715,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
     className: Button
+  - hash:
+      serializedVersion: 2
+      Hash: 6880d2f7ac4adad5e603cc70a130b5b7
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: QuestionsManage
   - hash:
       serializedVersion: 2
       Hash: eb0d857801cc6dfd1b9ca6baf1dca6c3
@@ -627,7 +789,7 @@ ScriptsOnlyBuild:
     className: ScriptMachine
   - hash:
       serializedVersion: 2
-      Hash: 1c0fedbb6f60de4f240cdc13786f135d
+      Hash: 5732bc5bf4ce88287106f44d0f53c5cc
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Island
@@ -681,7 +843,7 @@ ScriptsOnlyBuild:
     className: UnityOnCollisionExit2DMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 5065551b9e5542060eed41f3d80c0c61
+      Hash: f92f25c8f7e0998ebfe78c3d8b0036f4
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Block
@@ -691,6 +853,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.VisualScripting.Flow
     namespaceName: Unity.VisualScripting
     className: ScriptGraphAsset
+  - hash:
+      serializedVersion: 2
+      Hash: 5cfa21dd57178b4d2a66f3a07551af86
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: RemoteDatabase
   - hash:
       serializedVersion: 2
       Hash: fb79e95da8891fc7ac6c36ca6967af23
@@ -715,6 +883,18 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Postprocessing.Runtime
     namespaceName: UnityEngine.Rendering.PostProcessing
     className: PostProcessEffectSettings
+  - hash:
+      serializedVersion: 2
+      Hash: adba4d9b143ca2bbfbc9a990add16303
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: NetcodeHooks
+  - hash:
+      serializedVersion: 2
+      Hash: 8da63a19e17bf5703b89b17e1930e86a
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: MessageBox
   - hash:
       serializedVersion: 2
       Hash: 4718916586b3818eb69bf65df61f0f3a
@@ -789,6 +969,12 @@ ScriptsOnlyBuild:
     className: TMP_SubMeshUI
   - hash:
       serializedVersion: 2
+      Hash: ce21c25f76ba3d0c704be9139e93754b
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ExplosionThrownBomb
+  - hash:
+      serializedVersion: 2
       Hash: 9f92e751d2286296361a1d06b9e90c1e
     assemblyName: Unity.Postprocessing.Runtime
     namespaceName: UnityEngine.Rendering.PostProcessing
@@ -825,10 +1011,28 @@ ScriptsOnlyBuild:
     className: NetworkPrefabsList
   - hash:
       serializedVersion: 2
+      Hash: edcd0e9ec54c3c5cf51041690dfc9847
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ForgetPassword
+  - hash:
+      serializedVersion: 2
       Hash: 7e9cad7f71f9cc52f699bbd2d2a75734
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnPointerClickMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: 49a6ea493d2e89aa5a07f8f68656bbed
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: FloatingItem
+  - hash:
+      serializedVersion: 2
+      Hash: dcc929b311543f11b97545b45844d1e7
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: SignUp
   - hash:
       serializedVersion: 2
       Hash: ffaaa6b08bc8a8928411e8e402432358
@@ -837,7 +1041,13 @@ ScriptsOnlyBuild:
     className: PostProcessVolume
   - hash:
       serializedVersion: 2
-      Hash: 3bd8997c93919750d5dc4985ca6c36a8
+      Hash: c7a95c69290652b9beecea0d2a8a0374
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: RoomId
+  - hash:
+      serializedVersion: 2
+      Hash: d9370c981bac33ec3fd55bc336aabea6
     assemblyName: Assembly-CSharp
     namespaceName: GameUI
     className: ReadMap
@@ -891,13 +1101,19 @@ ScriptsOnlyBuild:
     className: UnityOnTransformChildrenChangedMessageListener
   - hash:
       serializedVersion: 2
+      Hash: 56d4af7950779e9946d6ef68a7088d43
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ItemsBarInside
+  - hash:
+      serializedVersion: 2
       Hash: 6d94138b60a9299798dda96c1ee6725f
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnBeginDragMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 41b7b13e5b202c243b157f9e59aa7a71
+      Hash: 9decc61545b70cd5494f137e54fbe86e
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: UseItem
@@ -919,6 +1135,18 @@ ScriptsOnlyBuild:
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnTriggerStayMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: d6767ea87b4ffd1fa792b75caad038ee
+    assemblyName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
+    namespaceName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
+    className: ClientNetworkAnimator
+  - hash:
+      serializedVersion: 2
+      Hash: 27e9c9543474c4741f0915c3ec5c7b10
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: NetworkObjectSpawner
   - hash:
       serializedVersion: 2
       Hash: 10c17b309bdca62b4d7fbaf113ed4ca0
@@ -951,6 +1179,12 @@ ScriptsOnlyBuild:
     className: Slider
   - hash:
       serializedVersion: 2
+      Hash: 88bcd4c9172bb4244cbf5a6fc8e0cac0
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: PlayerNameInput
+  - hash:
+      serializedVersion: 2
       Hash: 0c0b64d103fe555d830e8ca206abd12a
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
@@ -963,10 +1197,22 @@ ScriptsOnlyBuild:
     className: UnityOnCollisionEnter2DMessageListener
   - hash:
       serializedVersion: 2
+      Hash: a2fbf85f9a7c7230eeb55234c8da773a
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: SceneLoaderWrapper
+  - hash:
+      serializedVersion: 2
       Hash: 17f82e3e7d8f8b07a270a4aad9bfe79d
     assemblyName: Unity.TextMeshPro
     namespaceName: TMPro
     className: TMP_FontAsset
+  - hash:
+      serializedVersion: 2
+      Hash: bbbf93e762c4f3c9da3ad2d8fed9c5bf
+    assemblyName: Unity.Tutorials.Core
+    namespaceName: Unity.Tutorials.Core
+    className: SceneObjectGuid
   - hash:
       serializedVersion: 2
       Hash: 4ea1bf258a208f00f70cf744bd7e56ce
@@ -993,6 +1239,12 @@ ScriptsOnlyBuild:
     className: ParticleMenu
   - hash:
       serializedVersion: 2
+      Hash: c56dd8b8426e8d8b9f53899514165743
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: PartsOfBody
+  - hash:
+      serializedVersion: 2
       Hash: 0a57a93a2cc15db4d96d1036c9295e04
     assemblyName: Unity.Multiplayer.Tools.NetStatsMonitor.Component
     namespaceName: Unity.Multiplayer.Tools.NetStatsMonitor
@@ -1011,10 +1263,22 @@ ScriptsOnlyBuild:
     className: PanelEventHandler
   - hash:
       serializedVersion: 2
+      Hash: 8a572632c59ef288d1a8e9060345e216
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: DontDestroyOnLoad
+  - hash:
+      serializedVersion: 2
       Hash: 9dd54ce33440072d6692a67e0c384ad1
     assemblyName: Unity.Timeline
     namespaceName: UnityEngine.Timeline
     className: GroupTrack
+  - hash:
+      serializedVersion: 2
+      Hash: 44cdd55bfda7afb634e992c516e63209
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: CloseToExplosion
   - hash:
       serializedVersion: 2
       Hash: bf0842d88681628b29beb00b5e2ab785
@@ -1029,16 +1293,46 @@ ScriptsOnlyBuild:
     className: Text
   - hash:
       serializedVersion: 2
+      Hash: 9992cdbe46a6725e1d335fdb8cf5367f
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ScoreTable
+  - hash:
+      serializedVersion: 2
       Hash: 1ce63d97d1ca25cba2d91d5f32fd5f79
     assemblyName: Unity.VisualScripting.State
     namespaceName: Unity.VisualScripting
     className: StateGraphAsset
   - hash:
       serializedVersion: 2
+      Hash: 11b98bb2f034d69ee715fb8299cd23b4
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: JoinButton
+  - hash:
+      serializedVersion: 2
+      Hash: 5fc593b8e08f55c0a10319f00544defc
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ScrollQuestionView
+  - hash:
+      serializedVersion: 2
       Hash: 7e0a847c3ca5700087030dc9d1fa5ac7
     assemblyName: Unity.Netcode.Components
     namespaceName: Unity.Netcode.Components
     className: NetworkRigidbody
+  - hash:
+      serializedVersion: 2
+      Hash: 45198c15c8969993bf05f0084fd4ad2b
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: TextOfBlock
+  - hash:
+      serializedVersion: 2
+      Hash: 215d8fb7053740d33e2bec091e5fe449
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: ServerAdditiveSceneLoader
   - hash:
       serializedVersion: 2
       Hash: ef38c1407dba8c1f5d69f5db61a694fe
@@ -1053,10 +1347,22 @@ ScriptsOnlyBuild:
     className: AspectRatioFitter
   - hash:
       serializedVersion: 2
+      Hash: 5eee1f0e53861510a4862c8ec36d5f55
+    assemblyName: Unity.Services.Relay
+    namespaceName: Unity.Services.Relay.Scheduler
+    className: TaskSchedulerWebGL
+  - hash:
+      serializedVersion: 2
       Hash: 8e867e9b6da8d6e002a3b7061e5f4ea2
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Readme
+  - hash:
+      serializedVersion: 2
+      Hash: 3450efd9643dffa91dd418da41b086bb
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: ClientLoadingScreen
   - hash:
       serializedVersion: 2
       Hash: 9637dcdf3068a91dfe653e61bb82f13d
@@ -1065,10 +1371,16 @@ ScriptsOnlyBuild:
     className: TextMeshProUGUI
   - hash:
       serializedVersion: 2
-      Hash: f9e782853796fc64deb2aa210b2e3907
+      Hash: 940f70013a3fb13857b85efbfb643860
     assemblyName: Assembly-CSharp
     namespaceName: 
-    className: Flag
+    className: Login
+  - hash:
+      serializedVersion: 2
+      Hash: 605de068521c5eaf001ff688ad526702
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: AnimationHandler
   - hash:
       serializedVersion: 2
       Hash: da5a949a0bbd2ff91bc51c5805c2c41f
@@ -1077,10 +1389,22 @@ ScriptsOnlyBuild:
     className: UnityOnMouseUpAsButtonMessageListener
   - hash:
       serializedVersion: 2
+      Hash: 79c1aab69675ec55c0a2e694bb8f0542
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: SceneManager
+  - hash:
+      serializedVersion: 2
       Hash: 4f353524ce6564e40764f1ea080b2d85
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnTriggerStay2DMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: 234146c5726b1d8333c5bc3946414a9f
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: MainCamera
   - hash:
       serializedVersion: 2
       Hash: 9104447b683bf70406fa01f12ecb564a
@@ -1113,6 +1437,12 @@ ScriptsOnlyBuild:
     className: MarkerTrack
   - hash:
       serializedVersion: 2
+      Hash: deacb4ae873b5b88ba3c303ffe8e2690
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: FailedConnectToServer
+  - hash:
+      serializedVersion: 2
       Hash: 672716ae97f6ddb615fa5ac3ec9da349
     assemblyName: UnityEngine.TestRunner
     namespaceName: UnityEngine.TestTools
@@ -1131,16 +1461,10 @@ ScriptsOnlyBuild:
     className: TestDataGeneratorComponent
   - hash:
       serializedVersion: 2
-      Hash: 17021d825d214880dae1a1afab6ad751
+      Hash: c33cd8cff07e45ec112a9c8dea62bb15
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Timer
-  - hash:
-      serializedVersion: 2
-      Hash: e76c95a5002a9d833fa1f2a5ad716ce9
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: BackpackClick
   - hash:
       serializedVersion: 2
       Hash: f669be52680c88846b2093fd41d1e06e
@@ -1177,6 +1501,18 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
     className: VerticalLayoutGroup
+  - hash:
+      serializedVersion: 2
+      Hash: ae8f0975c5adfa03675bce1d5b968a56
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: QuestionField
+  - hash:
+      serializedVersion: 2
+      Hash: da7084c52fb053dbc6696ece4736ad06
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: WaitingPlayerList
   - hash:
       serializedVersion: 2
       Hash: c4b85a67513b4f0cf7b5fb2d5ded04b0
@@ -1275,6 +1611,12 @@ ScriptsOnlyBuild:
     className: UnityOnSubmitMessageListener
   - hash:
       serializedVersion: 2
+      Hash: e6ed1f32fde620ee88ccc4d26e9459da
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ItemsBar
+  - hash:
+      serializedVersion: 2
       Hash: 5ebc58ec194dd44630b25fcc270ad4af
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
@@ -1285,6 +1627,12 @@ ScriptsOnlyBuild:
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: TopBlock
+  - hash:
+      serializedVersion: 2
+      Hash: 03a9e25eedd3b26c6d8de8400edaae6d
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: RemoteNetworkManager
   - hash:
       serializedVersion: 2
       Hash: 4728e3d21cc2a12e391e71ec9b7eed0b
@@ -1303,6 +1651,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline
     namespaceName: UnityEngine.Timeline
     className: ControlTrack
+  - hash:
+      serializedVersion: 2
+      Hash: 038d73c1a71296060119a89c9feb7734
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: InputQuestionFields
   - hash:
       serializedVersion: 2
       Hash: 2fd42819c69acefd80a2bbcd49cbe8cf
@@ -1327,6 +1681,18 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
     className: ScrollRect
+  - hash:
+      serializedVersion: 2
+      Hash: 62006efea86e7fa947b5eb1102037fb6
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: PasswordRecover
+  - hash:
+      serializedVersion: 2
+      Hash: deaef5efc021d5cf7658ce374512ac64
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: ThrownBomb
   - hash:
       serializedVersion: 2
       Hash: 9a174471d4db2c0c6d3ac47d2f818db1
@@ -1371,22 +1737,28 @@ ScriptsOnlyBuild:
     className: TestDataGeneratorComponent
   - hash:
       serializedVersion: 2
-      Hash: 568292fb7ea6c4f7a667e5ff76bc7e85
-    assemblyName: Unity.VisualScripting.Core
-    namespaceName: Unity.VisualScripting
-    className: UnityOnMouseUpMessageListener
-  - hash:
-      serializedVersion: 2
       Hash: 033425e237c3d1e1e241302d742c817e
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: FlyText
   - hash:
       serializedVersion: 2
+      Hash: 568292fb7ea6c4f7a667e5ff76bc7e85
+    assemblyName: Unity.VisualScripting.Core
+    namespaceName: Unity.VisualScripting
+    className: UnityOnMouseUpMessageListener
+  - hash:
+      serializedVersion: 2
       Hash: 1553f209ae0b2d5d3a35685fca55f9c3
     assemblyName: Unity.TextMeshPro
     namespaceName: TMPro
     className: TMP_ScrollbarEventHandler
+  - hash:
+      serializedVersion: 2
+      Hash: 26c82ff03f1ea665dbb44d0bb1cdcfd3
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: NetworkedLoadingProgressTracker
   - hash:
       serializedVersion: 2
       Hash: eff619ddf8a7f64b8ee94e5770e39b91
@@ -1401,10 +1773,10 @@ ScriptsOnlyBuild:
     className: SignalEmitter
   - hash:
       serializedVersion: 2
-      Hash: 8ca4881f6143760beecab711f4a150ff
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: PlayUI
+      Hash: e438cfd2bd03451ae4707a096c8905d3
+    assemblyName: Unity.Multiplayer.Samples.Utilities
+    namespaceName: Unity.Multiplayer.Samples.Utilities
+    className: LoadingProgressManager
   - hash:
       serializedVersion: 2
       Hash: 02a47340661d2ea7c6d30e292cfef403
@@ -1443,101 +1815,41 @@ ScriptsOnlyBuild:
     className: UnityOnSliderValueChangedMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 27e9c9543474c4741f0915c3ec5c7b10
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: NetworkObjectSpawner
-  - hash:
-      serializedVersion: 2
-      Hash: a600e45f4803338e1f942aee7817894a
-    assemblyName: Unity.Services.Relay
-    namespaceName: Unity.Services.Relay.Scheduler
-    className: TaskSchedulerThreaded
-  - hash:
-      serializedVersion: 2
-      Hash: 4b2325a6cb73414b1cdf7fa93aa1a8af
-    assemblyName: Unity.Multiplayer.Samples.Utilities.RNSM
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: NetStatsMonitorCustomization
-  - hash:
-      serializedVersion: 2
-      Hash: a2fbf85f9a7c7230eeb55234c8da773a
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: SceneLoaderWrapper
-  - hash:
-      serializedVersion: 2
-      Hash: e438cfd2bd03451ae4707a096c8905d3
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: LoadingProgressManager
-  - hash:
-      serializedVersion: 2
-      Hash: 215d8fb7053740d33e2bec091e5fe449
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: ServerAdditiveSceneLoader
-  - hash:
-      serializedVersion: 2
-      Hash: c2e17d77d48bdfa31d7c40464bc5df0d
-    assemblyName: Unity.Multiplayer.Samples.Utilities
+      Hash: d0d4cdaf5dea507e52be418fc6c31f20
+    assemblyName: Assembly-CSharp
     namespaceName: 
-    className: EditorChildSceneLoader
+    className: WaitingRoom
   - hash:
       serializedVersion: 2
-      Hash: bbbf93e762c4f3c9da3ad2d8fed9c5bf
-    assemblyName: Unity.Tutorials.Core
-    namespaceName: Unity.Tutorials.Core
-    className: SceneObjectGuid
+      Hash: 6d01ff162098241429962467dd1390ed
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: Player
   - hash:
       serializedVersion: 2
-      Hash: adba4d9b143ca2bbfbc9a990add16303
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: NetcodeHooks
+      Hash: 1f56ddec04c2e1393b38b7a337b36ab7
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: EndOfTheGame
   - hash:
       serializedVersion: 2
-      Hash: dfb6913502ec81bb8fa5c3492539ab21
-    assemblyName: Unity.Multiplayer.Samples.Utilities.RNSM
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: AutoHide
+      Hash: 6c86e45d2b26a9fb3a2291a02ac4acc3
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: LogOut
   - hash:
       serializedVersion: 2
-      Hash: 8a572632c59ef288d1a8e9060345e216
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: DontDestroyOnLoad
+      Hash: 55f4073271457d16d0449b4f1e0bc018
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: TimeCountDown
   - hash:
       serializedVersion: 2
-      Hash: d6767ea87b4ffd1fa792b75caad038ee
-    assemblyName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
-    namespaceName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
-    className: ClientNetworkAnimator
-  - hash:
-      serializedVersion: 2
-      Hash: 26c82ff03f1ea665dbb44d0bb1cdcfd3
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: NetworkedLoadingProgressTracker
-  - hash:
-      serializedVersion: 2
-      Hash: 5eee1f0e53861510a4862c8ec36d5f55
-    assemblyName: Unity.Services.Relay
-    namespaceName: Unity.Services.Relay.Scheduler
-    className: TaskSchedulerWebGL
-  - hash:
-      serializedVersion: 2
-      Hash: 3450efd9643dffa91dd418da41b086bb
-    assemblyName: Unity.Multiplayer.Samples.Utilities
-    namespaceName: Unity.Multiplayer.Samples.Utilities
-    className: ClientLoadingScreen
-  - hash:
-      serializedVersion: 2
-      Hash: 80b07ae2e45c645a6fd8f7b11768f2a4
-    assemblyName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
-    namespaceName: Unity.Multiplayer.Samples.Utilities.ClientAuthority
-    className: ClientNetworkTransform
+      Hash: 993986f580baf909b0c407032460839c
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: RoomIdField
   platform: 19
   scenePathNames:
-  - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/tranh/Treasure/Build/Treasure.exe
+  - Assets/Scenes/PlaySence.unity
+  playerPath: C:/Users/tranh/Unity Projects/Treasure/Build/Treasure.exe

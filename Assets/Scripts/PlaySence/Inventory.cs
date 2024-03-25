@@ -1,82 +1,78 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TreasureGame;
-using Unity.VisualScripting;
+﻿using GameItems;
 using UnityEngine;
-using GameItems;
-using UnityEngine.UI;
-using System;
-using System.Drawing;
-using UnityEngine.UIElements;
-using TMPro;
-using UnityEngine.EventSystems;
 
 namespace GameUI
 {
-    public class Inventory : MonoBehaviour
+    public class Inventory : MonoBehaviour, IInitOwnerComponent
     {
-        public SelectedItem SelectedItem;
-        public ItemImage ItemImage;
-        public RectTransform BagPanel;
+        [SerializeField] private MultipleChoice MultipleChoice;
+        [SerializeField] private ItemInventory Bomb;
+        [SerializeField] private ItemInventory Glasses;
+        [SerializeField] private ItemInventory Shovel;
 
-        public Vector2 InitialPosition;
-        public Vector2 ContainerSize;
-        public Vector2 ItemsSize;
-        public float DistanceBetweenItems;
+        public Player Player;
 
-        public void Open()
+        private void Awake()
         {
-            gameObject.SetActive(!gameObject.activeSelf);
-            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().IsActive = !gameObject.activeSelf;
+            Bomb.TimeRecover = 10;
+            Bomb.Do += UseBomb;
 
-            PopUp();
+            Glasses.TimeRecover = 10;
+            Glasses.Do += UseGlasses;
+
+            Shovel.TimeRecover = 6;
+            Shovel.Do += UseShovel;
         }
 
-        public void PopUp()
+        private void Update()
         {
-            //ItemList itemsList = Player.Main.Bag;
-            ItemList itemList = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().Bag;
-
-            foreach (Transform clear in BagPanel)
-                if (clear.CompareTag("ImageItem")) Destroy(clear.gameObject);
-
-            int k = 0;
-            for (int i = 0; i < ContainerSize.y; i++)
-                for (int j = 0; j < ContainerSize.x; j++)
-                {
-                    if (k >= itemList.Count) return;
-                    Vector3 position = InitialPosition;
-                    position += new Vector3(DistanceBetweenItems + (DistanceBetweenItems + ItemsSize.x) * j,
-                        -DistanceBetweenItems - (DistanceBetweenItems + ItemsSize.y) * i);
-
-                    ItemImage addItem = Instantiate(ItemImage);
-                    addItem.Init(itemList[k], ItemsSize);
-                    AssignEvent(addItem);
-
-                    addItem.RectImage.anchorMax = new Vector2(0, 1);
-                    addItem.RectImage.anchorMin = new Vector2(0, 1);
-                    addItem.RectImage.pivot = new Vector2(0, 1);
-
-                    addItem.RectImage.anchoredPosition = position;
-                    addItem.transform.SetParent(BagPanel.transform, false);
-
-                    k++;
-                }
+            if (Player != null && Player.IsActive)
+            {
+                Glasses.Use(Input.GetKeyDown(KeyCode.Alpha1));
+                Shovel.Use(Input.GetKeyDown(KeyCode.Alpha2));
+                Bomb.Use(Input.GetKeyDown(KeyCode.Alpha3));
+            }
         }
 
-        private void AssignEvent(ItemImage image)
+        public void UseBomb()
         {
-            EventTrigger eventTrigger = image.GetComponent<EventTrigger>();
-            EventTrigger.Entry entry = new();
-            entry.eventID = EventTriggerType.PointerClick;
-            entry.callback.AddListener((data) => Selected((PointerEventData)data));
-            eventTrigger.triggers.Add(entry);
+            Player.ThrowBomb(true);
         }
 
-        private void Selected(PointerEventData e)
+        public void UseGlasses()
         {
-            ItemImage image = e.pointerPress.GetComponent<ItemImage>();
-            SelectedItem.Selected(image);
+            GameItems.Glasses.Detect(Player.BlockUnderFoot(), Player.Island.GetAllBlocks(), 9);
+        }
+
+        public void UseShovel()
+        {
+            Block[] blocks = GameItems.Glasses.DefineAround(Player.transform.position, Player.Island.GetAllBlocks(), 4);
+
+            foreach (Block block in blocks)
+            {
+                block.Init();
+                block.Secret = new()
+            {
+                QuestionFactory.GetQuestion()
+            };
+            }
+        }
+
+        public void StartGame()
+        {
+            Bomb.Timer.Play(10);
+            Glasses.Timer.Play(10);
+            Shovel.Timer.Play(10);
+        }
+
+        public void SetOwner(Player player)
+        {
+            Player = player;
+        }
+
+        public void RemoveOwner(Player player)
+        {
+            Player = null;
         }
     }
 }

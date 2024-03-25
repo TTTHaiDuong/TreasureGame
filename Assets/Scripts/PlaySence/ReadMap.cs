@@ -1,32 +1,23 @@
-﻿using System.Collections.Generic;
-using TMPro;
-using GameItems;
+﻿using GameItems;
 using UnityEngine;
 using TreasureGame;
 using System.Linq;
+using System.Data;
 
 namespace GameUI
 {
     public class ReadMap : MonoBehaviour
     {
         [SerializeField] private MultipleChoice MultipleChoice;
-        [SerializeField] private ShortAnswer ShortAnswer;
-
-        private bool IsShortAnswer;
         private Player Player;
         private Map Map;
 
         public void Display(Player player, Map map)
         {
-            Player = player;
-            Player.IsActive = false;
-
-            if (Map != map) IsShortAnswer = new GameRandom().Probability(0);
             Map = map;
-            if (IsShortAnswer || Map.Choices.Length != 3) ShortAnswer.Display(Player, Map);
-            else MultipleChoice.Display(Player, Map);
-
+            Player = player;
             gameObject.SetActive(true);
+            MultipleChoice.Display(player, map);
         }
 
         private void CompleteChallenge()
@@ -37,122 +28,53 @@ namespace GameUI
 
         public void Exit()
         {
-            Player.IsActive = true;
             if (Map.Pass) CompleteChallenge();
             gameObject.SetActive(false);
         }
     }
 
-    //public class DataBase
-    //{
-    //    private readonly string ConnectionString;
-    //    private readonly SqlConnection Connection;
-    //    private SqlDataAdapter Adapter;
-    //    private DataSet DataSet;
-
-    //    public DataBase()
-    //    {
-    //        ConnectionString = "";
-    //        Connection = new SqlConnection(ConnectionString);
-    //    }
-
-    //    public DataTable Execute(string query)
-    //    {
-    //        Adapter = new SqlDataAdapter(query, selectConnection: Connection);
-    //        DataSet = new DataSet();
-
-    //        return DataSet.Tables[0];
-    //    }
-
-    //    public void ExecuteNonQuery(string query)
-    //    {
-    //        SqlCommand sqlcmd = new(query, Connection);
-    //        Connection.Open();
-    //        sqlcmd.ExecuteNonQuery();
-    //        Connection.Close();
-    //    }
-    //}
-
-    //public class QuestionFactory
-    //{
-    //    static QuestionFactory()
-    //    {
-    //        List<LevelField> levelFields = new()
-    //        {
-    //            new(), // Nhận biết
-    //            new(), // Thông hiểu
-    //            new(), // Vận dụng thấp
-    //            new(), // Vận dụng cao
-    //            new(), // Phân tích
-    //            new(), // Tổng hợp
-    //            new()  // Đánh giá
-    //        };
-
-    //        LevelFields = levelFields.ToArray();
-    //    }
-
-    //    private readonly string QuestionsTableName = "";
-    //    private readonly string LevelColumnName = "";
-    //    private readonly string QuestionColumnName = "";
-    //    private readonly string AnswerColumnName = "";
-    //    private readonly string Choice1ColumnName = "";
-    //    private readonly string Choice2ColumnName = "";
-    //    private readonly string Choice3ColumnName = "";
-
-    //    public static LevelField[] LevelFields;
-    //    public DataBase DataBase = new();
-
-    //    public Map InitMap(int level)
-    //    {
-    //        foreach (LevelField field in LevelFields)
-    //            if (field.Level == level)
-    //            {
-    //                GameRandom rd = new();
-    //                Map map = new("", "")
-    //                {
-    //                    Level = level,
-    //                    IsLimitTime = rd.Probability(field.IsLimitTimeRate),
-    //                    LimitTime = rd.Next(field.LimitTimeInterval),
-    //                    IsOnce = rd.Probability(field.IsOnceRate),
-    //                    Penalty = rd.Probability(field.PenaltyRate),
-    //                    Reward = field.Reward
-    //                };
-    //                return map;
-    //            }
-    //        return null;
-    //    }
-
-    //    public DataTable GetQuestions(int level)
-    //    {
-    //        string query = $"SELECT * FROM {QuestionsTableName} WHERE {LevelColumnName} = {level}";
-    //        return DataBase.Execute(query);
-    //    }
-
-    //    public static GameItem[] GetReward(int level)
-    //    {
-    //        foreach (LevelField field in LevelFields)
-    //            if (field.Level == level) return field.Reward;
-    //        return null;
-    //    }
-    //}
-
-    public struct LevelField
+    public class QuestionFactory
     {
-        public LevelField(int level, float isLimitTimeRate, float isOnceRate, float penaltyRate, KeyValuePair<int, int> limitTimeInterval, GameItem[] reward)
+        static QuestionFactory()
         {
-            Level = level;
-            IsLimitTimeRate = isLimitTimeRate;
-            IsOnceRate = isOnceRate;
-            PenaltyRate = penaltyRate;
-            LimitTimeInterval = limitTimeInterval;
-            Reward = reward;
+            GetData();
         }
-        public int Level;
-        public KeyValuePair<int, int> LimitTimeInterval;
-        public float IsLimitTimeRate;
-        public float IsOnceRate;
-        public float PenaltyRate;
-        public GameItem[] Reward;
+
+        public static int ConnectionTime = 0;
+        public static DataTable QuestionTable;
+
+        public static void GetData()
+        {
+            Debug.Log("Try Get Question Table");
+            Player.ReceiceData += ReceiveData;
+            Player.ExecuteQuery($"SELECT * FROM {DatabaseManager.QuestionsTableName}", new string[0], new string[0]);
+
+            ConnectionTime++;
+            if (ConnectionTime == DatabaseManager.ConnectionTime) CannotConnectToSQLServer();
+        }
+
+        public static void ReceiveData()
+        {
+            Player.ReceiceData -= ReceiveData;
+            QuestionTable = Player.Result;
+            if (QuestionTable == null || !QuestionTable.Columns.Contains(DatabaseManager.QuestionColumn)) GetData();
+        }
+
+        public static Map GetQuestion()
+        {
+            if (QuestionTable == null) return new("Xin chào!", "A", "B", "C", "D");
+            int rd = new GameRandom().Next(0, QuestionTable.Rows.Count);
+            DataRow row = QuestionTable.Rows[rd];
+            Map map = new(row[1].ToString(), row[2].ToString(), row[3].ToString(), row[4].ToString(), row[5].ToString());
+
+            ConnectionTime = 0;
+            return map;
+        }
+
+        public static void CannotConnectToSQLServer()
+        {
+
+        }
     }
 
     public class Map : GameItem
@@ -162,59 +84,29 @@ namespace GameUI
             Question = question;
             Result = answer;
             Choices = choices;
-            Timer = new GameObject().AddComponent<Timer>();
             Count = 1;
         }
 
         public static int PassedQuestions;
 
-        private readonly string Question;
-        public readonly string Result;
-        public readonly string[] Choices;
+        public string Question;
+        public string Result;
+        public string[] Choices;
         public string[] OutChoices { private set; get; }
 
-        public Timer Timer;
-
         public bool Pass;
-        public float LimitedTime;
-        public bool IsOnce;
-        public bool Penalty;
-        public GameItem[] Reward;
-
-        public void Setter(float limitedTime, bool isOnce, bool penalty, GameItem[] reward)
-        {
-            LimitedTime = limitedTime;
-            IsOnce = isOnce;
-            Penalty = penalty;
-            Reward = reward;
-        }
-
-        public string GetQuestion()
-        {
-            if (LimitedTime > 0) Timer.Play(LimitedTime);
-            return Question;
-        }
 
         public string GetQuestion(out string[] choices)
         {
             OutChoices = Choices.Concat(new string[] { Result }).ToArray();
             new GameRandom().Shuffle(OutChoices);
             choices = OutChoices;
-            return GetQuestion();
+            return Question;
         }
 
         public bool Answer(string answer)
         {
-            if (!Pass && CheckAnswer(answer))
-            {
-                RightAnswer();
-                return true;
-            }
-            else
-            {
-                if (!Pass) WrongAnswer();
-                return false;
-            }
+            return !Pass && CheckAnswer(answer);
         }
 
         public bool Answer(int choice)
@@ -224,52 +116,13 @@ namespace GameUI
 
         private bool CheckAnswer(string answer)
         {
-            return true;
-        }
-
-        private void RightAnswer()
-        {
-            PassedQuestions++;
-            Pass = true;
-        }
-
-        private void WrongAnswer()
-        {
-            if (IsOnce) Pass = true;
-        }
-
-        public override string ToString()
-        {
-            return Question;
-        }
-
-        #region Phép so sánh và sao chép
-        public static bool operator ==(Map a, Map b)
-        {
-            return (a is null && b is null) || (a is not null && b is not null && a.Question == b.Question && a.Result == b.Result
-                && a.Choices == b.Choices && a.Pass == b.Pass && a.LimitedTime == b.LimitedTime
-                && a.IsOnce == b.IsOnce && a.Penalty == b.Penalty && a.Reward == b.Reward);
-        }
-
-        public static bool operator !=(Map a, Map b)
-        {
-            return !(a == b);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return this == obj as Map;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
+            if (answer == Result) return true;
+            else return false;
         }
 
         public override object Clone()
         {
             return new Map(Question, Result, Choices);
         }
-        #endregion
     }
 }

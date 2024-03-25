@@ -15,7 +15,7 @@ public class FlyText : MonoBehaviour
 
     void Update()
     {
-        if (transform.forward != LookForward) transform.forward = LookForward;
+        transform.forward = LookForward;
     }
 
     public void LookAt(Vector3 lookForward)

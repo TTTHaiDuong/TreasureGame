@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
-using Unity.Netcode;
 
-public class Timer : MonoBehaviour, INetworkSerializable
+public class Timer : MonoBehaviour
 {
     private TimerHandling _WhenStart;
     private TimerHandling _Tick;
@@ -103,19 +102,23 @@ public class Timer : MonoBehaviour, INetworkSerializable
         Time = 0;
     }
 
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    public void Promote()
     {
-        serializer.SerializeValue(ref IsRunning);
-        serializer.SerializeValue(ref Time);
-        serializer.SerializeValue(ref Delta);
+        Time = 0;
     }
 
-    public void NetworkDeserialize(Timer timer)
+    public string Serialize()
     {
-        timer.Delta = Delta;
-        timer.Time = Time;
-        if (timer.IsRunning) timer.Play(Time);
-        else timer.Stop();
+        return $"{Delta}|{Time}|{IsRunning}";
+    }
+
+    public void Deserialize(string info)
+    {
+        string[] split = info.Split('|');
+        Delta = float.Parse(split[0]);
+        Time = float.Parse(split[1]);
+        if (split[2] == "True") Play(Time);
+        else Stop();
     }
 }
 

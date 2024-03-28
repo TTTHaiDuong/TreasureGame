@@ -6,7 +6,7 @@ using GameUI;
 using System.Linq;
 using Unity.Netcode;
 
-public class Block : MonoBehaviour, INetworkSerializable
+public class Block : MonoBehaviour
 {
     [SerializeField] private List<TopBlock> List;
 
@@ -69,10 +69,6 @@ public class Block : MonoBehaviour, INetworkSerializable
 
                 return true;
             }
-            else
-            {
-                //player.Bag.Add(item);
-            }
         }
         Secret.Clear();
         return false;
@@ -115,21 +111,6 @@ public class Block : MonoBehaviour, INetworkSerializable
 
         Secret = new();
         Secret.AddRange((GameItem[])new GameRandom().Probability(suprisingThings.ToArray()));
-
-        foreach (GameItem item in Secret) Debug.Log(item.GetType().Name);
-    }
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref InitTimer);
-        serializer.SerializeValue(ref RecoverTimer);
-
-    }
-
-    public void NetworkDeserialize(Block block)
-    {
-        InitTimer.NetworkDeserialize(block.InitTimer);
-        RecoverTimer.NetworkDeserialize(block.RecoverTimer);
     }
 }
 

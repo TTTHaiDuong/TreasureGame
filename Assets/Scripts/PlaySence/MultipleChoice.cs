@@ -24,7 +24,7 @@ public class MultipleChoice : MonoBehaviour
 
     private void Awake()
     {
-        Timer = new GameObject().AddComponent<Timer>();
+        Timer = gameObject.AddComponent<Timer>();
         Timer.TickListening(CountDown);
         Timer.FinishListening(Penalty);
     }

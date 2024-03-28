@@ -1,18 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 
-public class ScoreTable : MonoBehaviour, IInitOwnerComponent
+public class ScoreTable : MonoBehaviour, IUISetActive
 {
     [SerializeField] private TextMeshProUGUI PlayerName;
     [SerializeField] private TextMeshProUGUI Score;
     [SerializeField] private TextMeshProUGUI OwnerName;
     [SerializeField] private TextMeshProUGUI OwnerScore;
 
-    private Player Owner;
-    
     public void Update()
     {
         Rating();
@@ -27,54 +24,53 @@ public class ScoreTable : MonoBehaviour, IInitOwnerComponent
             "<color=#FF7500><b>@text</b></color>",
         };
 
-        string[] playersName = SortPlayes(format.ToArray(), "@text", out string[] scores);
-        string ratingNames = string.Empty;
-        string ratingScores = string.Empty;
+        string[] playerNames = GetPlayerNamesRanking(out string[] scores);
+        string rankingNameText = string.Empty;
+        string rankingScoreText = string.Empty;
 
-        for (int i = 0; i < 3; i++)
-            if (i < playersName.Length)
+        for (int i = 0; i < format.Count; i++)
+            if (i < playerNames.Length)
             {
-                ratingNames += $"{playersName[i]}\n";
-                ratingScores += $"{scores[i]}\n";
+                rankingNameText += $"{format[i].Replace("@text", playerNames[i])}\n";
+                rankingScoreText += $"{format[i].Replace("text", scores[i])}\n";
             }
 
-        PlayerName.text = ratingNames;
-        Score.text = ratingScores;
+        PlayerName.text = rankingNameText;
+        Score.text = rankingScoreText;
 
-        SetOwnerRating();
+        SetOwnerRaking();
     }
 
-    public void SetOwnerRating()
+    public void SetOwnerRaking()
     {
-        if (Owner != null)
+        if (Player.GetOwner() != null && SceneManager.IsClient)
         {
-            OwnerName.text = $"{YourRating(Player.GetOwner()) + 1}. {Owner.Name}\n";
-            OwnerScore.text = $"{Owner.Score}\n";
+            OwnerName.text = $"{YourRaking(Player.GetOwner()) + 1}. {Player.GetOwner().Name}\n";
+            OwnerScore.text = $"{Player.GetOwner().Score}\n";
         }
     }
 
-    public int YourRating(Player player)
+    public int YourRaking(Player player)
     {
-        if (Owner != null)
+        if (Player.GetOwner() != null)
         {
-            Player[] players = FindObjectsOfType<Player>();
+            Player[] players = Player.FindPlayersWithCondition(p => p.IsEnterGame);
             for (int i = 0; i < players.Length; i++)
                 if (players[i].Equals(player)) return i;
         }
-        return 0;
+        return -1;
     }
 
     public Player[] SortToScore()
     {
-        Player[] players = FindObjectsOfType<Player>();
-
+        Player[] players = Player.FindPlayersWithCondition(p => p.IsEnterGame && p.IsClient && !p.IsHost);
         List<Player> sortPlayers = players.ToList();
         sortPlayers.Sort((a, b) => a.Score.CompareTo(b.Score));
 
         return sortPlayers.ToArray();
     }
 
-    public string[] SortPlayes(string[] formats, string replace, out string[] scores)
+    public string[] GetPlayerNamesRanking(out string[] scores)
     {
         Player[] players = SortToScore();
 
@@ -83,29 +79,15 @@ public class ScoreTable : MonoBehaviour, IInitOwnerComponent
 
         for (int i = 0; i < outPutName.Length; i++)
         {
-            if (i < formats.Length && formats[i] != null)
-            {
-                outPutName[i] = formats[i].Replace(replace, $"{i + 1}. {players[i].Name}");
-                outPutScore[i] = formats[i].Replace(replace, $"{players[i].Score}");
-            }
-            else
-            {
-                outPutName[i] = $"{i + 1}. {players[i].Name}";
-                outPutScore[i] = $"{players[i].Score}";
-            }
+            outPutName[i] = $"{i + 1}. {players[i].Name}";
+            outPutScore[i] = $"{players[i].Score}";
         }
-
         scores = outPutScore;
         return outPutName;
     }
 
-    public void SetOwner(Player player)
+    public void SetActive(bool active)
     {
-        Owner = player;
-    }
-
-    public void RemoveOwner(Player player)
-    {
-        Owner = null;
+        gameObject.SetActive(active);
     }
 }

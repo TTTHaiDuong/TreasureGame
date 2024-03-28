@@ -1,9 +1,5 @@
 using GameUI;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Island : MonoBehaviour
@@ -13,11 +9,12 @@ public class Island : MonoBehaviour
 
     private void Update()
     {
-        if (QuestionFactory.QuestionTable != null && !Flag) InitIsland();
+        if (QuestionFactory.QuestionTable != null && !Flag && Player.GetOwner() != null && Player.GetOwner().IsEnterGame) InitIsland();
     }
 
     public void InitIsland()
     {
+        Debug.Log("InitIsland");
         Flag = true;
 
         float y = -1;
@@ -36,6 +33,8 @@ public class Island : MonoBehaviour
         }
 
         BaseBlock.gameObject.SetActive(false);
+        Player.GetOwner().RandomPositionSpawn();
+        Debug.Log("Init island");
     }
 
     public Block[] GetAllBlocks()

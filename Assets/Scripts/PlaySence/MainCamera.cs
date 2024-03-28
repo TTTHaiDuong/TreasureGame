@@ -12,10 +12,15 @@ public class MainCamera : MonoBehaviour, IInitOwnerComponent
 
     public Player Player { private set; get; }
 
-    private void Init()
+    public void Init()
     {
         OriginalForward = transform.forward;
         DeltaPosition = Player.transform.position - transform.position;
+    }
+
+    public void SetStandardForward()
+    {
+        DeltaPosition = ConstDelta;
     }
 
     private void Update()
@@ -24,37 +29,41 @@ public class MainCamera : MonoBehaviour, IInitOwnerComponent
         {
             transform.forward = OriginalForward;
             if (!IsCameraDragging) transform.position = Player.transform.position - DeltaPosition;
-
-            Dragging(Input.GetMouseButton(1));
         }
     }
 
-    private void Dragging(bool active)
+    public void Peek(bool active)
+    {
+        if (active) Drag();
+        else if (Input.GetMouseButtonUp(1)) IsCameraDragging = false;
+
+    }
+
+    public void Move(bool active)
     {
         if (active)
         {
-            if (!IsCameraDragging)
-            {
-                DragStartCameraPosition = transform.position;
-                StartMousePosition = new Vector3(Input.mousePosition.x, 0, Input.mousePosition.y);
-                IsCameraDragging = true;
-            }
-            Vector3 dragDelta = transform.TransformDirection(new Vector3(Input.mousePosition.x, 0, Input.mousePosition.y) - StartMousePosition);
-            dragDelta.x *= 2.5f;
-            dragDelta.y = 0;
-            transform.position = DragStartCameraPosition - 0.02f * dragDelta;
+            Drag();
         }
-        else if (Input.GetMouseButtonUp(1))
+        else if (Input.GetMouseButtonUp(0)) 
         {
+            DeltaPosition = Player.transform.position - transform.position;
             IsCameraDragging = false;
-            transform.position = DragStartCameraPosition;
         }
     }
 
-    public void SetStandardPosition()
+    private void Drag()
     {
-        if (Player != null)
-            transform.position = Player.transform.position - ConstDelta;
+        if (!IsCameraDragging)
+        {
+            DragStartCameraPosition = transform.position;
+            StartMousePosition = new Vector3(Input.mousePosition.x, 0, Input.mousePosition.y);
+            IsCameraDragging = true;
+        }
+        Vector3 dragDelta = transform.TransformDirection(new Vector3(Input.mousePosition.x, 0, Input.mousePosition.y) - StartMousePosition);
+        dragDelta.x *= 2.5f;
+        dragDelta.y = 0;
+        transform.position = DragStartCameraPosition - 0.02f * dragDelta;
     }
 
     public void SetOwner(Player player)

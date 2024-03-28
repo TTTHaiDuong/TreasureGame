@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Random = UnityEngine.Random;
 
 public class GunShoot : MonoBehaviour {
 
@@ -39,8 +37,7 @@ public class GunShoot : MonoBehaviour {
 			anim.SetTrigger ("Fire");
 
 			Vector3 rayOrigin = gunEnd.position;
-			RaycastHit hit;
-			if (Physics.Raycast(rayOrigin, gunEnd.forward, out hit, weaponRange))
+			if (Physics.Raycast(rayOrigin, gunEnd.forward, out RaycastHit hit, weaponRange))
 			{
 				HandleHit(hit);
 			}

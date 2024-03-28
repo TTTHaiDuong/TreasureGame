@@ -2,15 +2,20 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class TimeCountDown : MonoBehaviour
+public class TimeCountDown : MonoBehaviour, IUISetActive
 {
     [SerializeField] private TextMeshProUGUI Text;
     public static Timer Timer;
 
     private void Awake()
     {
-        Timer = new GameObject().AddComponent<Timer>();
+        if (Timer == null) Timer = new GameObject().AddComponent<Timer>();
         Timer.TickListening(SetText);
+    }
+
+    public void Init()
+    {
+        Awake();
     }
 
     private void SetText(object obj)
@@ -23,5 +28,10 @@ public class TimeCountDown : MonoBehaviour
             Text.text = $"{time.Minutes.ToString("D2")}:{time.Seconds.ToString("D2")}";
         else
             Text.text = $"{time.Hours.ToString("D2")}:{time.Minutes.ToString("D2")}:{time.Seconds.ToString("D2")}";
+    }
+
+    public void SetActive(bool active)
+    {
+        gameObject.SetActive(active);
     }
 }

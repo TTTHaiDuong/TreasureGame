@@ -25,7 +25,6 @@ ScriptsOnlyBuild:
     - PartsOfBody
     - Player
     - PlayerCount
-    - RoomIdField
     - SceneManager
     - ScoreTable
     - TextOfBlock
@@ -60,10 +59,8 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
@@ -82,7 +79,6 @@ ScriptsOnlyBuild:
   serializedClasses:
     Unity.Netcode.Runtime:
     - Unity.Netcode.NetworkConfig
-    - Unity.Netcode.NetworkPrefab
     - Unity.Netcode.NetworkPrefabs
     - Unity.Netcode.Transports.UTP.UnityTransport/ConnectionAddressData
     - Unity.Netcode.Transports.UTP.UnityTransport/SimulatorParameters
@@ -137,12 +133,6 @@ ScriptsOnlyBuild:
     - UnityEngine.UIElements.StyleValueHandle
   methodsToPreserve:
   - assembly: Assembly-CSharp
-    fullTypeName: WaitingRoom
-    methodName: SetName
-  - assembly: Assembly-CSharp
-    fullTypeName: MultipleChoice
-    methodName: Button2
-  - assembly: Assembly-CSharp
     fullTypeName: Warning
     methodName: OnPointedEnter
   - assembly: Assembly-CSharp
@@ -150,7 +140,13 @@ ScriptsOnlyBuild:
     methodName: OnPointedExit
   - assembly: Assembly-CSharp
     fullTypeName: WaitingRoom
-    methodName: SendStartToPlayServerRpc
+    methodName: EventRequestToEnterClick
+  - assembly: Assembly-CSharp
+    fullTypeName: MultipleChoice
+    methodName: Button2
+  - assembly: Assembly-CSharp
+    fullTypeName: WaitingRoom
+    methodName: EventHostStartGameClick
   - assembly: Assembly-CSharp
     fullTypeName: Warning
     methodName: OnPointedEnter
@@ -177,13 +173,16 @@ ScriptsOnlyBuild:
     methodName: ServerClick
   - assembly: Assembly-CSharp
     fullTypeName: Login
-    methodName: SubmitClick
+    methodName: EventSubmitClick
   - assembly: Assembly-CSharp
     fullTypeName: MultipleChoice
     methodName: Button3
   - assembly: Assembly-CSharp
+    fullTypeName: WaitingRoom
+    methodName: EventRoomPasswordInputFieldTextChangedHandler
+  - assembly: Assembly-CSharp
     fullTypeName: SceneManager
-    methodName: ReturnToWaitingRoom
+    methodName: WaitingRoomToPlay
   sceneClasses:
     Assets/Scenes/PlaySence.unity:
     - Class: 1
@@ -243,111 +242,105 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1902}
     - Class: 114
-      Script: {instanceID: 2642}
+      Script: {instanceID: 2644}
     - Class: 114
-      Script: {instanceID: 2708}
+      Script: {instanceID: 2710}
     - Class: 114
-      Script: {instanceID: 2714}
+      Script: {instanceID: 2716}
     - Class: 114
-      Script: {instanceID: 2890}
+      Script: {instanceID: 2892}
     - Class: 114
-      Script: {instanceID: 2916}
+      Script: {instanceID: 2918}
     - Class: 114
-      Script: {instanceID: 3358}
+      Script: {instanceID: 3362}
     - Class: 114
-      Script: {instanceID: 3454}
+      Script: {instanceID: 3458}
     - Class: 114
-      Script: {instanceID: 3512}
+      Script: {instanceID: 3516}
     - Class: 114
-      Script: {instanceID: 3558}
+      Script: {instanceID: 3518}
     - Class: 114
-      Script: {instanceID: 3692}
+      Script: {instanceID: 3564}
     - Class: 114
-      Script: {instanceID: 4198}
+      Script: {instanceID: 3698}
     - Class: 114
-      Script: {instanceID: 4554}
+      Script: {instanceID: 3720}
     - Class: 114
-      Script: {instanceID: 4628}
+      Script: {instanceID: 4206}
     - Class: 114
-      Script: {instanceID: 5034}
+      Script: {instanceID: 4544}
     - Class: 114
-      Script: {instanceID: 5860}
+      Script: {instanceID: 4566}
     - Class: 114
-      Script: {instanceID: 5884}
+      Script: {instanceID: 4640}
     - Class: 114
-      Script: {instanceID: 6204}
+      Script: {instanceID: 5046}
     - Class: 114
-      Script: {instanceID: 6254}
+      Script: {instanceID: 5872}
     - Class: 114
-      Script: {instanceID: 6334}
+      Script: {instanceID: 5896}
     - Class: 114
-      Script: {instanceID: 6596}
+      Script: {instanceID: 6216}
     - Class: 114
-      Script: {instanceID: 6682}
+      Script: {instanceID: 6266}
     - Class: 114
-      Script: {instanceID: 6828}
+      Script: {instanceID: 6346}
     - Class: 114
-      Script: {instanceID: 7104}
+      Script: {instanceID: 6608}
     - Class: 114
-      Script: {instanceID: 7122}
+      Script: {instanceID: 6694}
     - Class: 114
-      Script: {instanceID: 7192}
+      Script: {instanceID: 6840}
     - Class: 114
-      Script: {instanceID: 7528}
+      Script: {instanceID: 7116}
     - Class: 114
-      Script: {instanceID: 7716}
+      Script: {instanceID: 7134}
     - Class: 114
-      Script: {instanceID: 7912}
+      Script: {instanceID: 7178}
     - Class: 114
-      Script: {instanceID: 7996}
+      Script: {instanceID: 7206}
     - Class: 114
-      Script: {instanceID: 8488}
+      Script: {instanceID: 7542}
     - Class: 114
-      Script: {instanceID: 8674}
+      Script: {instanceID: 7730}
     - Class: 114
-      Script: {instanceID: 8752}
+      Script: {instanceID: 7926}
     - Class: 114
-      Script: {instanceID: 8870}
+      Script: {instanceID: 8010}
     - Class: 114
-      Script: {instanceID: 9022}
+      Script: {instanceID: 8500}
     - Class: 114
-      Script: {instanceID: 9164}
+      Script: {instanceID: 8678}
     - Class: 114
-      Script: {instanceID: 9220}
+      Script: {instanceID: 8686}
     - Class: 114
-      Script: {instanceID: 9886}
+      Script: {instanceID: 8766}
     - Class: 114
-      Script: {instanceID: 10158}
+      Script: {instanceID: 8886}
     - Class: 114
-      Script: {instanceID: 10284}
+      Script: {instanceID: 9038}
     - Class: 114
-      Script: {instanceID: 10368}
+      Script: {instanceID: 9180}
     - Class: 114
-      Script: {instanceID: 10434}
+      Script: {instanceID: 9236}
     - Class: 114
-      Script: {instanceID: 10458}
+      Script: {instanceID: 9902}
     - Class: 114
-      Script: {instanceID: 10890}
+      Script: {instanceID: 10174}
     - Class: 114
-      Script: {instanceID: 11226}
+      Script: {instanceID: 10300}
     - Class: 114
-      Script: {instanceID: 11544}
+      Script: {instanceID: 10384}
     - Class: 114
-      Script: {instanceID: 12194}
+      Script: {instanceID: 10450}
     - Class: 114
-      Script: {instanceID: 12198}
+      Script: {instanceID: 10474}
     - Class: 114
-      Script: {instanceID: 12206}
+      Script: {instanceID: 10906}
     - Class: 114
-      Script: {instanceID: 28806}
+      Script: {instanceID: 11242}
     - Class: 114
-      Script: {instanceID: 32494}
-    - Class: 114
-      Script: {instanceID: 32510}
-    - Class: 114
-      Script: {instanceID: 32564}
-    - Class: 114
-      Script: {instanceID: 115332}
+      Script: {instanceID: 11560}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -549,6 +542,12 @@ ScriptsOnlyBuild:
     className: PostProcessLayer
   - hash:
       serializedVersion: 2
+      Hash: b83b321caf108b604e834f0df792bed9
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: RoomPasswordField
+  - hash:
+      serializedVersion: 2
       Hash: 1321993db8249e1e05e1e0492b2bbdc3
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
@@ -615,6 +614,12 @@ ScriptsOnlyBuild:
     className: MultiplayerDebug
   - hash:
       serializedVersion: 2
+      Hash: 1a37d408ced7b677ae57059a9eafbd3d
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: Player
+  - hash:
+      serializedVersion: 2
       Hash: a0e0bc431a5a05794fcf44452b3eb06a
     assemblyName: Unity.Multiplayer.Tools.NetStatsMonitor.Configuration
     namespaceName: Unity.Multiplayer.Tools.NetStatsMonitor
@@ -643,6 +648,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.TestRunner
     namespaceName: UnityEngine.TestRunner.Utils
     className: TestRunCallbackListener
+  - hash:
+      serializedVersion: 2
+      Hash: 1f56ddec04c2e1393b38b7a337b36ab7
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: EndOfTheGame
   - hash:
       serializedVersion: 2
       Hash: 5a4aa2850fe11587f47e34c270c7fd22
@@ -769,6 +780,12 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI
     namespaceName: UnityEngine.UI
     className: ContentSizeFitter
+  - hash:
+      serializedVersion: 2
+      Hash: 0c2462b77eb43759081efbcf15aebfe0
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: WaitingRoom
   - hash:
       serializedVersion: 2
       Hash: c6369b4cc3be620d6c9300e920bc3d52
@@ -1125,6 +1142,12 @@ ScriptsOnlyBuild:
     className: AnimationPlayableAsset
   - hash:
       serializedVersion: 2
+      Hash: 55f4073271457d16d0449b4f1e0bc018
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: TimeCountDown
+  - hash:
+      serializedVersion: 2
       Hash: 47ee34eb8b6021efa0289dbbb17a5a85
     assemblyName: Unity.TextMeshPro
     namespaceName: TMPro
@@ -1365,13 +1388,19 @@ ScriptsOnlyBuild:
     className: ClientLoadingScreen
   - hash:
       serializedVersion: 2
+      Hash: 413a98693e67b7e7aa4e04116cfb320b
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: LogOut
+  - hash:
+      serializedVersion: 2
       Hash: 9637dcdf3068a91dfe653e61bb82f13d
     assemblyName: Unity.TextMeshPro
     namespaceName: TMPro
     className: TextMeshProUGUI
   - hash:
       serializedVersion: 2
-      Hash: 940f70013a3fb13857b85efbfb643860
+      Hash: 2fe1881a28276058a43dcaf79af13e2a
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Login
@@ -1389,7 +1418,7 @@ ScriptsOnlyBuild:
     className: UnityOnMouseUpAsButtonMessageListener
   - hash:
       serializedVersion: 2
-      Hash: 79c1aab69675ec55c0a2e694bb8f0542
+      Hash: c128fe123beeecae4b19b2826a108e08
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: SceneManager
@@ -1813,42 +1842,6 @@ ScriptsOnlyBuild:
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnSliderValueChangedMessageListener
-  - hash:
-      serializedVersion: 2
-      Hash: d0d4cdaf5dea507e52be418fc6c31f20
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: WaitingRoom
-  - hash:
-      serializedVersion: 2
-      Hash: 6d01ff162098241429962467dd1390ed
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: Player
-  - hash:
-      serializedVersion: 2
-      Hash: 1f56ddec04c2e1393b38b7a337b36ab7
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: EndOfTheGame
-  - hash:
-      serializedVersion: 2
-      Hash: 6c86e45d2b26a9fb3a2291a02ac4acc3
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: LogOut
-  - hash:
-      serializedVersion: 2
-      Hash: 55f4073271457d16d0449b4f1e0bc018
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: TimeCountDown
-  - hash:
-      serializedVersion: 2
-      Hash: 993986f580baf909b0c407032460839c
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: RoomIdField
   platform: 19
   scenePathNames:
   - Assets/Scenes/PlaySence.unity

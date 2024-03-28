@@ -83,7 +83,7 @@ public class RemoteDatabase : NetworkBehaviour
     [ServerRpc]
     private void DatabaseServerRpc(string query)
     {
-        Debug.Log("Start Server");
+        Debug.Log("Start ServerControls");
         DatabaseClientRpc(query);
     }
 
@@ -156,8 +156,11 @@ public class ArraySerializable<T> : INetworkSerializable
 {
     public ArraySerializable(T[] array)
     {
-        Wrapper wrapper = new() { Items = array.ToList() };
-        SerializedString = JsonUtility.ToJson(wrapper);
+        if (array != null)
+        {
+            Wrapper wrapper = new() { Items = array.ToList() };
+            SerializedString = JsonUtility.ToJson(wrapper);
+        }
     }
     public ArraySerializable() { }
 
@@ -176,6 +179,7 @@ public class ArraySerializable<T> : INetworkSerializable
 
     public T[] Deserialize()
     {
+        if (SerializedString == "") return new T[0]; 
         Wrapper wrapper = JsonUtility.FromJson<Wrapper>(SerializedString);
         return wrapper.Items.ToArray();
     }

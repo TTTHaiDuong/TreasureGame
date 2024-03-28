@@ -1,3 +1,4 @@
+using GameUI;
 using System;
 using TMPro;
 using UnityEngine;
@@ -21,7 +22,7 @@ public class ItemInventory : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void Use(bool active)
     {
-        if (active && !Timer.IsRunning)
+        if (active && !Timer.IsRunning && transform.parent.gameObject.activeSelf)
         {
             Timer.Play(TimeRecover);
             Do?.Invoke();

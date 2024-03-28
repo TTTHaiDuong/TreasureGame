@@ -68,7 +68,6 @@
     <Compile Include="Assets\Scripts\PlaySence\Warning.cs" />
     <Compile Include="Assets\Scripts\PlaySence\LogOut.cs" />
     <Compile Include="Assets\Scripts\AdminSence\QuestionsManage.cs" />
-    <Compile Include="Assets\Scripts\PlaySence\TimeCountdown.cs" />
     <Compile Include="Assets\Scripts\PlaySence\TextOfBlock.cs" />
     <Compile Include="Assets\Scripts\PlaySence\ExplosionThrownBomb.cs" />
     <Compile Include="Assets\UnityTechnologies\EffectExamples\Shared\Scripts\DecalDestroyer.cs" />
@@ -99,6 +98,7 @@
     <Compile Include="Assets\Scripts\PlaySence\FlyText.cs" />
     <Compile Include="Assets\UnityTechnologies\EffectExamples\Shared\Scripts\GunAim.cs" />
     <Compile Include="Assets\Scripts\PlaySence\MultiplayerDebug.cs" />
+    <Compile Include="Assets\Scripts\PlaySence\RoomPasswordField.cs" />
     <Compile Include="Assets\Scripts\PlaySence\ItemImage.cs" />
     <Compile Include="Assets\Scripts\AdminSence\RemoteDatabase.cs" />
     <Compile Include="Assets\UnityTechnologies\EffectExamples\TutorialInfo\Scripts\Readme.cs" />
@@ -123,7 +123,6 @@
     <Compile Include="Assets\Scripts\PlaySence\FloatingItem.cs" />
     <Compile Include="Assets\Scripts\PlaySence\Login.cs" />
     <Compile Include="Assets\Scripts\PlaySence\AnimationHandler.cs" />
-    <Compile Include="Assets\Scripts\PlaySence\RoomIdField.cs" />
     <Compile Include="Assets\Scripts\PlaySence\ReadMap.cs" />
     <Compile Include="Assets\Scripts\PlaySence\NetworkButtonsClick.cs" />
     <Compile Include="Assets\Scripts\PlaySence\MainCamera.cs" />

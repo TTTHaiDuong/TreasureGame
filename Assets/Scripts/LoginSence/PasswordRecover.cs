@@ -15,7 +15,7 @@ public class PasswordRecover : MonoBehaviour
 
     private void Awake()
     {
-        Timer = new GameObject().AddComponent<Timer>();
+        Timer = gameObject.AddComponent<Timer>();
         Timer.StartListening((obj) => { });
         Timer.FinishListening((obj) => { });
     }

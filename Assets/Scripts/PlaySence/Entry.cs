@@ -207,7 +207,7 @@ namespace TreasureGame
         public delegate void FailedConnectToServer(object obj);
         public static FailedConnectToServer FailedConnect;
 
-        public static int ConnectionTime = 10000;
+        public static int ConnectionTime = 10;
 
         private const string ConnectionString = @"Data source=DUONG\HAIDUONG;Initial Catalog=TREASUREGAME;Integrated Security = True";
 
@@ -243,9 +243,21 @@ namespace TreasureGame
                         SqlDataAdapter adapter = new(command);
                         adapter.Fill(table);
                     }
-                    catch (SqlException)
+                    catch (SqlException ex)
                     {
-                        FailedConnect?.Invoke("");
+                        FailedConnect?.Invoke(ex);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        FailedConnect?.Invoke(ex);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        FailedConnect?.Invoke(ex);
+                    }
+                    finally
+                    {
+                        connection.Close();
                     }
                 }
             }
@@ -274,9 +286,21 @@ namespace TreasureGame
                         SqlDataAdapter adapter = new(command);
                         adapter.Fill(table);
                     }
-                    catch (SqlException)
+                    catch (SqlException ex)
                     {
-                        FailedConnect?.Invoke("");
+                        FailedConnect?.Invoke(ex);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        FailedConnect?.Invoke(ex);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        FailedConnect?.Invoke(ex);
+                    }
+                    finally
+                    {
+                        connection.Close();
                     }
                 }
             }

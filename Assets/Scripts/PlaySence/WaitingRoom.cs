@@ -1,79 +1,66 @@
-﻿using GameUI;
-using TMPro;
+﻿using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-public class WaitingRoom : MonoBehaviour
+public class WaitingRoom : MonoBehaviour, IUISetActive
 {
     [SerializeField] private SceneManager Scenes;
-    [SerializeField] private TMP_InputField InputPlayerName;
     [SerializeField] private TextMeshProUGUI CountPlayer;
     [SerializeField] private TextMeshProUGUI PlayerList;
 
     [SerializeField] private RectTransform StartButton;
-    [SerializeField] private RectTransform Client;
-    [SerializeField] private RectTransform Server;
-    [SerializeField] private RoomIdField RoomId;
+    [SerializeField] private RectTransform ClientControls;
+    [SerializeField] private RectTransform ServerControls;
+    [SerializeField] private TMP_InputField Password;
 
-    public Player Owner;
-
+    public TMP_InputField InputPlayerName;
+    public bool RequestFlag;
 
     private void Update()
     {
         Listed();
-        if ((SceneManager.IsServer || (Player.GetOwner() != null && Player.GetOwner().Name != "")) && Player.EnterGame &&
-            (!SceneManager.IsClient || (SceneManager.IsClient && StringHandler.RemoveNonPrintChars(RoomId.GetComponent<TMP_InputField>().text) == SceneManager.RoomPassword)))
-        {
-            Scenes.WaitingRoomToPlay();
-        }
     }
 
     private void Listed()
     {
-        Player[] players = FindObjectsOfType<Player>();
+        Player[] players = Player.FindPlayersWithCondition(p => p.IsLoggedIn && p.IsClient && !p.IsHost);
 
         CountPlayer.text = $"Hiện tại có {players.Length} người tham gia";
         string setList = string.Empty;
         foreach (Player p in players)
-            if (p.Name != "") setList += p.Name + "     ";
+            if (p.StudentId != "") setList += p.Name + "     ";
 
         PlayerList.text = setList;
     }
 
-    public void SetName()
+    public void EventRequestToEnterClick()
     {
-        Player player = Player.GetOwner();
-        player.Name = StringHandler.RemoveNonPrintChars(InputPlayerName.text);
+        Player.GetOwner().Name = StringHandler.RemoveNonPrintChars(InputPlayerName.text);
+
+        if (StringHandler.RemoveNonPrintChars(Password.text) == SceneManager.RoomPassword) RequestFlag = true;
+        else RequestFlag = false;
+    }
+
+    public void EventRoomPasswordInputFieldTextChangedHandler()
+    {
+        RequestFlag = false;
+    }
+
+    public void EventHostStartGameClick()
+    {
+        Scenes.WaitingRoomToPlay();
+        SceneManager.EnterGame = true;
     }
 
     public void SetActive(bool active)
     {
-        IfServerOrClient();
-        Player.EnterGame = false;
+        DisplayControlsOfServerOrClient();
         gameObject.SetActive(active);
     }
 
-    public void IfServerOrClient()
+    public void DisplayControlsOfServerOrClient()
     {
-        Server.gameObject.SetActive(NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost);
-        RoomId.gameObject.SetActive(SceneManager.IsClient);
-        if (Player.GetOwner() == null)
-        {
-            Client.gameObject.SetActive(false);
-            Vector2 posStart = StartButton.transform.position;
-            posStart.x = 0;
-            StartButton.transform.position = posStart;
-        }
-    }
-
-    public void SendStartToPlayServerRpc(bool active)
-    {
-        Player.EnterGame = active;
-        Player.SetFeaturesGame(Player.EnterGame, SceneManager.PlayingTime, SceneManager.RoomPassword, TimeCountDown.Timer);
-        
-        Inventory inv = FindObjectOfType<Inventory>();
-        inv.StartGame();
-
-        if (Player.GetOwner() != null) Player.GetOwner().IsActive = true;
+        ServerControls.gameObject.SetActive(NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost);
+        ClientControls.gameObject.SetActive(SceneManager.IsClient);
     }
 }

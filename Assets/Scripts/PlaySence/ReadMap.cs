@@ -43,9 +43,8 @@ namespace GameUI
         public static int ConnectionTime = 0;
         public static DataTable QuestionTable;
 
-        public static void GetData()
+        public static void GetData() // Bắt đầu lấy dữ liệu
         {
-            Debug.Log("Try Get Question Table");
             Player.ReceiceData += ReceiveData;
             Player.ExecuteQuery($"SELECT * FROM {DatabaseManager.QuestionsTableName}", new string[0], new string[0]);
 
@@ -53,17 +52,18 @@ namespace GameUI
             if (ConnectionTime == DatabaseManager.ConnectionTime) CannotConnectToSQLServer();
         }
 
-        public static void ReceiveData()
+        public static void ReceiveData() // Nhận được dữ liệu
         {
             Player.ReceiceData -= ReceiveData;
             QuestionTable = Player.Result;
-            if (QuestionTable == null || !QuestionTable.Columns.Contains(DatabaseManager.QuestionColumn)) GetData();
+            if (QuestionTable == null || QuestionTable.Rows.Count == 0 || !QuestionTable.Columns.Contains(DatabaseManager.QuestionColumn)) CannotConnectToSQLServer();
+            // Nếu như bảng dữ liệu không hợp lệ như là null, số dòng bằng 0, tên cột không chính xác
         }
 
-        public static Map GetQuestion()
+        public static Map GetQuestion() // Các lớp khác truy xuất câu hỏi
         {
-            if (QuestionTable == null) return new("Xin chào!", "A", "B", "C", "D");
-            int rd = new GameRandom().Next(0, QuestionTable.Rows.Count);
+            if (QuestionTable == null || QuestionTable.Rows.Count == 0) return new("Hãy chọn đáp án!", "A", "B", "C", "D");
+            int rd = new GameRandom().Next(QuestionTable.Rows.Count);
             DataRow row = QuestionTable.Rows[rd];
             Map map = new(row[1].ToString(), row[2].ToString(), row[3].ToString(), row[4].ToString(), row[5].ToString());
 
@@ -71,9 +71,10 @@ namespace GameUI
             return map;
         }
 
-        public static void CannotConnectToSQLServer()
+        public static void CannotConnectToSQLServer() // Không thể kết nối đến SQL server
         {
-
+            Player.ReceiceData -= ReceiveData;
+            ConnectionTime = 0;
         }
     }
 

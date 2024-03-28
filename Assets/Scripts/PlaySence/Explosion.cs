@@ -22,7 +22,10 @@ public class Explosion : MonoBehaviour
         Play(second);
     }
 
-    public void Play(float second) => Timer.Play(second);
+    public void Play(float second)
+    {
+        if (gameObject.activeSelf) Timer.Play(second);
+    }
 
     public void Play()
     {

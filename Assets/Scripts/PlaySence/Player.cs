@@ -1,40 +1,48 @@
 ﻿using GameItems;
 using GameUI;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Data;
+using System.Linq;
 using TreasureGame;
 using Unity.Netcode;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
+    #region Unity objects
     [SerializeField] private string _Name;
-    [SerializeField] private FlyText NameTable; // Bảng tên nhân vật
+    [SerializeField] private FlyText NameTable;
 
-    public MainCamera PlayerCamera;
+    [HideInInspector] public Inventory Inventory;
+    [HideInInspector] public MainCamera PlayerCamera;
+    [HideInInspector] public Island Island;
+
     public PartsOfBody Body;
     public Animator Animator;
-    public Island Island;
 
     private Vector3 TargetPosition;
     public Timer LivingTimer;
-    public bool IsActive;
+    #endregion
 
     public string StudentId;
     public int Score;
 
-    #region Điều khiển các chức năng khác của game
-    public static bool EnterGame;
+    #region Các chức năng
+    public bool IsActive;
+    public bool IsLoggedIn;
+    public bool IsEnterGame;
+    public bool IsVisible { private set; get; } = true;
     #endregion
 
     #region Điều khiển Database từ xa
     public static event Action ReceiceData;
-    public static DataTable Result;
-    public static string Query;
-    public static string[] Parameters;
-    public static string[] Values;
+    private static DataTable _Result;
+    public static DataTable Result
+    {
+        set { _Result = value; }
+        get { if (_Result != null) return _Result.Clone(); else return null; }
+    }
     #endregion
 
     public string Name
@@ -45,55 +53,68 @@ public class Player : NetworkBehaviour
 
     private void Awake()
     {
+        PlayerCamera = Camera.main.GetComponent<MainCamera>();
+
         LivingTimer = gameObject.AddComponent<Timer>();
-        LivingTimer.StartListening(SetActive);
-        LivingTimer.FinishListening(SetActive);
-        LivingTimer.StartObj = false;
-        LivingTimer.FinishObj = true;
+        LivingTimer.StartListening((obj) => SetActive(false));
+        LivingTimer.FinishListening((obj) => SetActive(true));
 
         Island = FindObjectOfType<Island>();
     }
 
     private void Start()
     {
-        PlayerCamera = Camera.main.GetComponent<MainCamera>();
-
-        transform.position = new(6, 0.13f, 0);
-
         InitReferences();
-
         NameTable.LookAt(PlayerCamera.transform.forward);
-        Name = "";
 
-        IsActive = true;
+        Island.InitIsland();
     }
 
     void Update()
     {
         if (IsOwner)
         {
-            if (IsActive)
+            #region other code
+            if (!SceneManager.IsClient)
+                PlayerCamera.Move(Input.GetMouseButton(0));
+
+            if (IsActive && IsEnterGame && SceneManager.IsClient)
             {
                 MoveInput(Input.GetMouseButton(0));
                 DigUp(Input.GetKeyDown(KeyCode.Space) && !Animator.GetBool("IsWalking"));
                 ThrowBomb(Input.GetKeyDown(KeyCode.F));
 
-                if (Input.GetKeyDown(KeyCode.Q))
-                {
-                    //Xem vị trí bom dưới đất
-                }
+                Inventory.Glasses.Use(Input.GetKeyDown(KeyCode.Alpha1));
+                Inventory.Shovel.Use(Input.GetKeyDown(KeyCode.Alpha2));
+                Inventory.Bomb.Use(Input.GetKeyDown(KeyCode.Alpha3));
             }
 
-            Timer time = new GameObject().AddComponent<Timer>();
-            if (TimeCountDown.Timer != null) time = TimeCountDown.Timer;
-            SyncFeaturesClientRpc(EnterGame, SceneManager.PlayingTime, SceneManager.RoomPassword, time);
-            SyncServerRpc(Name, StudentId, Score, transform.position, transform.forward, Animator.GetBool("IsWalking"), IsActive);
-            ExecuteSendToServerRpc(Query, new(Parameters), new(Values), new(Result));
+            PlayerCamera.Peek(Input.GetMouseButton(1));
+
+            if (SceneManager.RoomPassword != null && TimeCountDown.Timer != null)
+                SyncFeaturesServerRpc(IsLoggedIn, SceneManager.EnterGame, IsEnterGame, SceneManager.PlayingTime, SceneManager.RoomPassword, TimeCountDown.Timer.Serialize());
+            #endregion
+            SyncServerRpc(Name, StudentId, Score, transform.position, transform.forward, Animator.GetBool("IsWalking"));
+
         }
 
-        SkipInput(Input.GetKeyDown(KeyCode.C));
+        if (Result != null)
+            foreach (DataColumn col in Result.Columns) Debug.Log(col.ColumnName);
 
-        if (IsServer || IsHost) Result = DatabaseManager.ExecuteQuery(Query, Parameters, Values);
+        // Debug...
+        SkipInput(Input.GetKeyDown(KeyCode.C));
+    }
+
+    public void RandomPositionSpawn()
+    {
+        float baseY = 0.13f;
+        Block[] blocks = Island.GetAllBlocks();
+        Block random = new GameRandom().ChooseFromList(blocks);
+        Vector3 pos = random.TopBlock.transform.position;
+        pos.y = baseY;
+
+        transform.position = pos;
+        PlayerCamera.SetStandardForward();
     }
 
     public void InitReferences()
@@ -106,6 +127,17 @@ public class Player : NetworkBehaviour
         }
     }
 
+    public void Visible(bool visible)
+    {
+        if (visible == IsVisible) return;
+        IsVisible = visible;
+        MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
+        CanvasRenderer[] cvRenderers = GetComponentsInChildren<CanvasRenderer>();
+
+        foreach (MeshRenderer renderer in renderers) renderer.enabled = visible;
+        foreach (CanvasRenderer renderer in cvRenderers) renderer.cullTransparentMesh = visible;
+    }
+
     /// <summary>
     /// Debug...
     /// </summary>
@@ -115,7 +147,7 @@ public class Player : NetworkBehaviour
     }
 
     /// <summary>
-    /// Event Animation tham chiếu đến.
+    /// Event Animation của nhân vật tham chiếu đến.
     /// </summary>
     public void FinishThrowing()
     {
@@ -130,25 +162,23 @@ public class Player : NetworkBehaviour
 
     #region Đồng bộ các thuộc tính nhân vật
     [ServerRpc]
-    private void SyncServerRpc(string name, string studentId, int score, Vector3 position, Vector3 forward, bool isWalking, bool isActive)
+    private void SyncServerRpc(string name, string studentId, int score, Vector3 position, Vector3 forward, bool isWalking)
     {
-        PlayerInfo sync = new()
-        {
-            Name = name,
-            StudentId = studentId,
-            Score = score,
-            Position = position,
-            Forward = forward,
-            IsWalking = isWalking,
-            IsActive = isActive
-        };
-        SyncClientRpc(sync);
+        SyncClientRpc(name, studentId, score, position, forward, isWalking);
     }
 
     [ClientRpc]
-    private void SyncClientRpc(PlayerInfo sync)
+    private void SyncClientRpc(string name, string studentId, int score, Vector3 position, Vector3 forward, bool isWalking)
     {
-        if (!IsOwner) sync.Deserialize(this);
+        if (!IsOwner)
+        {
+            SetName(name);
+            StudentId = studentId;
+            Score = score;
+            transform.position = position;
+            transform.forward = forward;
+            Animator.SetBool("IsWalking", isWalking);
+        }
     }
     #endregion
 
@@ -224,24 +254,27 @@ public class Player : NetworkBehaviour
     #endregion
 
     #region Đồng bộ các tính năng của trò chơi
-    public static void SetFeaturesGame(bool enterGame, int playingTime, string roomPassword, Timer timer)
-    {
-        GetOwner().SyncFeaturesServerRpc(enterGame, playingTime, roomPassword, timer);
-    }
-
     [ServerRpc]
-    private void SyncFeaturesServerRpc(bool enterGame, int playingTime, string roomPassword, Timer timer)
+    private void SyncFeaturesServerRpc(bool isLoggedIn, bool enterGame, bool isEnterGame, int playingTime, string roomPassword, string timerS)
     {
-        SyncFeaturesClientRpc(enterGame, playingTime, roomPassword, timer);
+        SyncFeaturesToAllClientRpc(isLoggedIn, enterGame, isEnterGame, playingTime, roomPassword, timerS);
     }
 
     [ClientRpc]
-    private void SyncFeaturesClientRpc(bool enterGame, int playingTime, string roomPassword, Timer timer)
+    private void SyncFeaturesToAllClientRpc(bool isLoggedIn, bool enterGame, bool isEnterGame, int playingTime, string roomPassword, string timerS)
     {
-        EnterGame = enterGame;
-        SceneManager.PlayingTime = playingTime;
-        SceneManager.RoomPassword = roomPassword;
-        timer.NetworkDeserialize(TimeCountDown.Timer);
+        if (!IsOwner)
+        {
+            IsLoggedIn = isLoggedIn;
+            IsEnterGame = isEnterGame;
+            if (!NetworkManager.Singleton.IsServer)
+            {
+                SceneManager.EnterGame = enterGame;
+                SceneManager.PlayingTime = playingTime;
+                SceneManager.RoomPassword = roomPassword;
+                TimeCountDown.Timer.Deserialize(timerS);
+            }
+        }
     }
     #endregion
 
@@ -251,10 +284,10 @@ public class Player : NetworkBehaviour
         else LivingTimer.Play(second);
     }
 
-    public void SetActive(object active)
+    public void SetActive(bool active)
     {
-        IsActive = (bool)active;
-        Body.SetActiveChildren(IsActive);
+        IsActive = active;
+        Body.SetActiveChildren(active);
     }
 
     public void DigUp(bool active)
@@ -271,69 +304,68 @@ public class Player : NetworkBehaviour
         return Glasses.DefineAround(transform.position, Island.GetAllBlocks(), 1)[0];
     }
 
-    #region Điều khiển từ xa Database
+    #region Điều khiển Database từ xa
     public static void ExecuteQuery(string query, string[] parameters, string[] values)
     {
-        Query = query;
-        Parameters = parameters;
-        Values = values;
+        if (query != "")
+        {
+            if (NetworkManager.Singleton.IsServer) Result = DatabaseManager.ExecuteQuery(query, parameters, values);
+            else if (GetOwner() != null) GetOwner().SendToServerRpc(query, new(parameters), new(values));
+        }
     }
 
     [ServerRpc]
-    private void ExecuteSendToServerRpc(string query, ArraySerializable<string> paraS, ArraySerializable<string> valS, DataTableSerializable table)
+    private void SendToServerRpc(string query, ArraySerializable<string> paraS, ArraySerializable<string> valS)
     {
-        ReceiveClientRpc(query, paraS, valS, table);
+        Debug.Log("Send Query");
+        ExecuteOnServerClientRpc(query, paraS, valS);
     }
 
     [ClientRpc]
-    private void ReceiveClientRpc(string query, ArraySerializable<string> paraS, ArraySerializable<string> valS, DataTableSerializable table)
+    private void ExecuteOnServerClientRpc(string query, ArraySerializable<string> paraS, ArraySerializable<string> valS)
     {
-        Result = table.Deserialize();
-        Query = query;
-        Parameters = paraS.Deserialize();
-        Values = valS.Deserialize();
-        ReceiceData?.Invoke();
+        Debug.Log("Execute On Server");
+        for (int i = 0; i < 20; i++)
+        {
+            Result = DatabaseManager.ExecuteQuery(query, paraS.Deserialize(), valS.Deserialize());
+            if (Result != null && Result.Rows.Count != 0) break;
+        }
+        if (Result != null && Result.Rows.Count != 0) GetOwner().SendResultToServerRpc(new(Result));
+    }
+
+    [ServerRpc]
+    private void SendResultToServerRpc(DataTableSerializable table)
+    {
+        Debug.Log("Send Result");
+        ReceiveResultClientRpc(table);
+    }
+
+    [ClientRpc]
+    private void ReceiveResultClientRpc(DataTableSerializable table)
+    {
+        if (!IsOwner)
+        {
+            Debug.Log("Receiver Result");
+
+            Result = table.Deserialize();
+            ReceiceData?.Invoke();
+
+            if (Result != null)
+                foreach (DataColumn col in Result.Columns) Debug.Log("Client" + col.ColumnName);
+        }
     }
     #endregion
 
     public static Player GetOwner()
     {
+        Player[] found = FindPlayersWithCondition(p => p.IsOwner);
+        if (found == null || found.Length == 0) return null;
+        else return found[0];
+    }
+
+    public static Player[] FindPlayersWithCondition(Func<Player, bool> condition)
+    {
         Player[] players = FindObjectsOfType<Player>();
-        foreach (Player player in players)
-            if (player.IsOwner) return player;
-        return null;
-    }
-}
-
-public class PlayerInfo : INetworkSerializable
-{
-    public string Name;
-    public string StudentId;
-    public int Score;
-    public Vector3 Position;
-    public Vector3 Forward;
-    public bool IsWalking;
-    public bool IsActive;
-
-    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-    {
-        serializer.SerializeValue(ref Name);
-        serializer.SerializeValue(ref StudentId);
-        serializer.SerializeValue(ref Score);
-        serializer.SerializeValue(ref Position);
-        serializer.SerializeValue(ref Forward);
-        serializer.SerializeValue(ref IsWalking);
-        serializer.SerializeValue(ref IsActive);
-    }
-
-    public void Deserialize(Player player)
-    {
-        player.SetName(Name);
-        player.StudentId = StudentId;
-        player.Score = Score;
-        player.transform.position = Position;
-        player.transform.forward = Forward;
-        player.Animator.SetBool("IsWalking", IsWalking);
-        player.IsActive = IsActive;
+        return players.Where(condition).ToArray();
     }
 }

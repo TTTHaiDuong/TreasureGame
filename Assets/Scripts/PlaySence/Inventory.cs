@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace GameUI
 {
-    public class Inventory : MonoBehaviour, IInitOwnerComponent
+    public class Inventory : MonoBehaviour, IInitOwnerComponent, IUISetActive
     {
         [SerializeField] private MultipleChoice MultipleChoice;
-        [SerializeField] private ItemInventory Bomb;
-        [SerializeField] private ItemInventory Glasses;
-        [SerializeField] private ItemInventory Shovel;
+        public ItemInventory Bomb;
+        public ItemInventory Glasses;
+        public ItemInventory Shovel;
 
         public Player Player;
 
@@ -22,16 +22,6 @@ namespace GameUI
 
             Shovel.TimeRecover = 6;
             Shovel.Do += UseShovel;
-        }
-
-        private void Update()
-        {
-            if (Player != null && Player.IsActive)
-            {
-                Glasses.Use(Input.GetKeyDown(KeyCode.Alpha1));
-                Shovel.Use(Input.GetKeyDown(KeyCode.Alpha2));
-                Bomb.Use(Input.GetKeyDown(KeyCode.Alpha3));
-            }
         }
 
         public void UseBomb()
@@ -52,13 +42,13 @@ namespace GameUI
             {
                 block.Init();
                 block.Secret = new()
-            {
-                QuestionFactory.GetQuestion()
-            };
+                {
+                      QuestionFactory.GetQuestion()
+                };
             }
         }
 
-        public void StartGame()
+        private void WaitToUse()
         {
             Bomb.Timer.Play(10);
             Glasses.Timer.Play(10);
@@ -68,11 +58,18 @@ namespace GameUI
         public void SetOwner(Player player)
         {
             Player = player;
+            Player.Inventory = this;
         }
 
         public void RemoveOwner(Player player)
         {
             Player = null;
+        }
+
+        public void SetActive(bool active)
+        {
+            gameObject.SetActive(active);
+            if (active) WaitToUse();
         }
     }
 }

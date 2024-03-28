@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class TopBlock : MonoBehaviour
@@ -16,8 +13,11 @@ public class TopBlock : MonoBehaviour
 
     public void OnMouseEnter()
     {
-        GetComponent<Renderer>().material.color = Highlight;
-        IsMouseEnter = true;
+        if (SceneManager.IsClient)
+        {
+            GetComponent<Renderer>().material.color = Highlight;
+            IsMouseEnter = true;
+        }
     }
 
     public void OnMouseExit()

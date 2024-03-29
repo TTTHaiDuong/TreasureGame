@@ -14,12 +14,12 @@ public class EndOfTheGame : MonoBehaviour, IUISetActive
         string rating = string.Empty;
         for (int i = 0; i < 3; i++)
             if (i < players.Length)
-                rating += $"<color=#25FFFF><b>Top {i + 1}. {players[i].Name}     {players[i].Score}</b></color>\n";
+                rating += $"<color=#25FFFF><b>Top {i + 1}. {players[i].Name}          {players[i].Score}</b></color>\n";
 
-        if (Player.GetOwner() != null && SceneManager.IsClient)
+        if (Player.GetOwner() != null && Player.GetOwner().Name != "")
         {
             int yourRating = ScoreTable.YourRaking(Player.GetOwner());
-            rating += $"\n<b>You: {yourRating + 1}. {Player.GetOwner().Name}     {Player.GetOwner().Score}</b>";
+            rating += $"\n<b>You: {yourRating + 1}. {Player.GetOwner().Name}          {Player.GetOwner().Score}</b>";
         }
 
         Rating.text = rating;

@@ -5,18 +5,9 @@ using UnityEngine;
 public class Island : MonoBehaviour
 {
     public Block BaseBlock;
-    public bool Flag;
-
-    private void Update()
-    {
-        if (QuestionFactory.QuestionTable != null && !Flag && Player.GetOwner() != null && Player.GetOwner().IsEnterGame) InitIsland();
-    }
 
     public void InitIsland()
     {
-        Debug.Log("InitIsland");
-        Flag = true;
-
         float y = -1;
         foreach (Transform block in transform)
         {

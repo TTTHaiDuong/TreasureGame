@@ -8,32 +8,30 @@ using TreasureGame;
 using Unity.Netcode;
 using UnityEngine;
 
+/// <summary>
+/// Người chơi
+/// </summary>
 public class Player : NetworkBehaviour
 {
     #region Unity objects
     [SerializeField] private string _Name;
-    [SerializeField] private FlyText NameTable;
+    [SerializeField] private FlyText NameTable; // Bảng tên nhân vật
 
-    [HideInInspector] public Inventory Inventory;
-    [HideInInspector] public MainCamera PlayerCamera;
-    [HideInInspector] public Island Island;
+    [HideInInspector] public Inventory Inventory; // Túi đồ vật phẩm
+    [HideInInspector] public MainCamera PlayerCamera; // Camera
+    [HideInInspector] public Island Island; // Đảo bản đồ
 
-    public PartsOfBody Body;
+    public PartsOfBody Body; // Các bộ phận của nhân vật
     public Animator Animator;
 
-    private Vector3 TargetPosition;
-    public Timer LivingTimer;
+    private Vector3 TargetPosition; // Đích đến khi di chuyển nhân vật
+    public Timer LivingTimer; // "Đồng hồ hồi sinh"
     #endregion
 
-    public string StudentId;
-    public int Score;
+    public string StudentId; // Mã số sinh viên
+    public int Score; // Điểm số trong trò chơi
 
-    #region Các chức năng
-    public bool IsActive;
-    public bool IsLoggedIn;
-    public bool IsEnterGame;
-    public bool IsVisible { private set; get; } = true;
-    #endregion
+    public bool IsActive; // Được kích hoạt
 
     #region Điều khiển Database từ xa
     public static event Action ReceiceData;
@@ -66,19 +64,16 @@ public class Player : NetworkBehaviour
     {
         InitReferences();
         NameTable.LookAt(PlayerCamera.transform.forward);
-
-        Island.InitIsland();
     }
 
     void Update()
     {
         if (IsOwner)
         {
-            #region other code
-            if (!SceneManager.IsClient)
+            if (NetworkManager.Singleton.IsServer)
                 PlayerCamera.Move(Input.GetMouseButton(0));
 
-            if (IsActive && IsEnterGame && SceneManager.IsClient)
+            if (IsActive && SceneManager.IsClient)
             {
                 MoveInput(Input.GetMouseButton(0));
                 DigUp(Input.GetKeyDown(KeyCode.Space) && !Animator.GetBool("IsWalking"));
@@ -91,20 +86,18 @@ public class Player : NetworkBehaviour
 
             PlayerCamera.Peek(Input.GetMouseButton(1));
 
-            if (SceneManager.RoomPassword != null && TimeCountDown.Timer != null)
-                SyncFeaturesServerRpc(IsLoggedIn, SceneManager.EnterGame, IsEnterGame, SceneManager.PlayingTime, SceneManager.RoomPassword, TimeCountDown.Timer.Serialize());
-            #endregion
+            if (TimeCountDown.Timer != null)
+            SyncFeaturesServerRpc(SceneManager.EnterGame, SceneManager.TimeToPlay, SceneManager.RoomPassword, TimeCountDown.Timer.Serialize(), new(SceneManager.Account), new(SceneManager.Question));
             SyncServerRpc(Name, StudentId, Score, transform.position, transform.forward, Animator.GetBool("IsWalking"));
-
         }
-
-        if (Result != null)
-            foreach (DataColumn col in Result.Columns) Debug.Log(col.ColumnName);
 
         // Debug...
         SkipInput(Input.GetKeyDown(KeyCode.C));
     }
 
+    /// <summary>
+    /// Lựa chọn ngẫu nhiên điểm sinh ra nhân vật
+    /// </summary>
     public void RandomPositionSpawn()
     {
         float baseY = 0.13f;
@@ -125,17 +118,6 @@ public class Player : NetworkBehaviour
             foreach (GameObject obj in initComponents)
                 obj.GetComponent<IInitOwnerComponent>().SetOwner(this);
         }
-    }
-
-    public void Visible(bool visible)
-    {
-        if (visible == IsVisible) return;
-        IsVisible = visible;
-        MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
-        CanvasRenderer[] cvRenderers = GetComponentsInChildren<CanvasRenderer>();
-
-        foreach (MeshRenderer renderer in renderers) renderer.enabled = visible;
-        foreach (CanvasRenderer renderer in cvRenderers) renderer.cullTransparentMesh = visible;
     }
 
     /// <summary>
@@ -255,25 +237,23 @@ public class Player : NetworkBehaviour
 
     #region Đồng bộ các tính năng của trò chơi
     [ServerRpc]
-    private void SyncFeaturesServerRpc(bool isLoggedIn, bool enterGame, bool isEnterGame, int playingTime, string roomPassword, string timerS)
+    private void SyncFeaturesServerRpc(bool enterGame, int playingTime, string roomPassword, string timerS, DataTableSerializable account, DataTableSerializable question)
     {
-        SyncFeaturesToAllClientRpc(isLoggedIn, enterGame, isEnterGame, playingTime, roomPassword, timerS);
+        SyncFeaturesClientRpc(enterGame, playingTime, roomPassword, timerS, account, question);
     }
 
     [ClientRpc]
-    private void SyncFeaturesToAllClientRpc(bool isLoggedIn, bool enterGame, bool isEnterGame, int playingTime, string roomPassword, string timerS)
+    private void SyncFeaturesClientRpc(bool enterGame, int playingTime, string roomPassword, string timerS, DataTableSerializable account, DataTableSerializable question)
     {
-        if (!IsOwner)
+        if (!IsOwner && !NetworkManager.Singleton.IsServer)
         {
-            IsLoggedIn = isLoggedIn;
-            IsEnterGame = isEnterGame;
-            if (!NetworkManager.Singleton.IsServer)
-            {
-                SceneManager.EnterGame = enterGame;
-                SceneManager.PlayingTime = playingTime;
-                SceneManager.RoomPassword = roomPassword;
-                TimeCountDown.Timer.Deserialize(timerS);
-            }
+            Debug.Log("AAA");
+            SceneManager.Account = account.Deserialize();
+            SceneManager.Question = question.Deserialize();
+            SceneManager.EnterGame = enterGame;
+            SceneManager.TimeToPlay = playingTime;
+            SceneManager.RoomPassword = roomPassword;
+            TimeCountDown.Timer.Deserialize(timerS);
         }
     }
     #endregion
@@ -309,7 +289,11 @@ public class Player : NetworkBehaviour
     {
         if (query != "")
         {
-            if (NetworkManager.Singleton.IsServer) Result = DatabaseManager.ExecuteQuery(query, parameters, values);
+            if (NetworkManager.Singleton.IsServer)
+            {
+                Result = DBProvider.ExecuteQuery(query, parameters, values);
+                ReceiceData?.Invoke();
+            }
             else if (GetOwner() != null) GetOwner().SendToServerRpc(query, new(parameters), new(values));
         }
     }
@@ -324,34 +308,36 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     private void ExecuteOnServerClientRpc(string query, ArraySerializable<string> paraS, ArraySerializable<string> valS)
     {
-        Debug.Log("Execute On Server");
-        for (int i = 0; i < 20; i++)
+        if (IsHost && !IsOwner)
         {
-            Result = DatabaseManager.ExecuteQuery(query, paraS.Deserialize(), valS.Deserialize());
-            if (Result != null && Result.Rows.Count != 0) break;
+            Debug.Log("Execute On Server");
+
+            Result = DBProvider.ExecuteQuery(query, paraS.Deserialize(), valS.Deserialize());
+            Debug.Log("Send Result");
+
+            foreach (DataColumn col in Result.Columns) Debug.Log("Client" + col.ColumnName);
+
+            GetOwner().SendResultToServerRpc(new(Result));
         }
-        if (Result != null && Result.Rows.Count != 0) GetOwner().SendResultToServerRpc(new(Result));
     }
 
     [ServerRpc]
     private void SendResultToServerRpc(DataTableSerializable table)
     {
-        Debug.Log("Send Result");
         ReceiveResultClientRpc(table);
     }
 
     [ClientRpc]
     private void ReceiveResultClientRpc(DataTableSerializable table)
     {
-        if (!IsOwner)
+        if (!IsOwner && !NetworkManager.Singleton.IsServer)
         {
             Debug.Log("Receiver Result");
 
             Result = table.Deserialize();
             ReceiceData?.Invoke();
 
-            if (Result != null)
-                foreach (DataColumn col in Result.Columns) Debug.Log("Client" + col.ColumnName);
+            foreach (DataColumn col in Result.Columns) Debug.Log("Client" + col.ColumnName);
         }
     }
     #endregion

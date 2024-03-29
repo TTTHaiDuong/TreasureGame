@@ -9,8 +9,11 @@ public class TimeCountDown : MonoBehaviour, IUISetActive
 
     private void Awake()
     {
-        if (Timer == null) Timer = new GameObject().AddComponent<Timer>();
-        Timer.TickListening(SetText);
+        if (Timer == null)
+        {
+            Timer = new GameObject().AddComponent<Timer>();
+            Timer.TickListening(SetText);
+        }
     }
 
     public void Init()

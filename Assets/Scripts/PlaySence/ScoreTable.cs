@@ -3,7 +3,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
-public class ScoreTable : MonoBehaviour, IUISetActive
+public class ScoreTable : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI PlayerName;
     [SerializeField] private TextMeshProUGUI Score;
@@ -32,7 +32,7 @@ public class ScoreTable : MonoBehaviour, IUISetActive
             if (i < playerNames.Length)
             {
                 rankingNameText += $"{format[i].Replace("@text", playerNames[i])}\n";
-                rankingScoreText += $"{format[i].Replace("text", scores[i])}\n";
+                rankingScoreText += $"{format[i].Replace("@text", scores[i])}\n";
             }
 
         PlayerName.text = rankingNameText;
@@ -43,7 +43,7 @@ public class ScoreTable : MonoBehaviour, IUISetActive
 
     public void SetOwnerRaking()
     {
-        if (Player.GetOwner() != null && SceneManager.IsClient)
+        if (Player.GetOwner() != null && Player.GetOwner().Name != "")
         {
             OwnerName.text = $"{YourRaking(Player.GetOwner()) + 1}. {Player.GetOwner().Name}\n";
             OwnerScore.text = $"{Player.GetOwner().Score}\n";
@@ -52,9 +52,9 @@ public class ScoreTable : MonoBehaviour, IUISetActive
 
     public int YourRaking(Player player)
     {
-        if (Player.GetOwner() != null)
+        if (Player.GetOwner() != null && Player.GetOwner().Name != "")
         {
-            Player[] players = Player.FindPlayersWithCondition(p => p.IsEnterGame);
+            Player[] players = Player.FindPlayersWithCondition(p => p.Name != "");
             for (int i = 0; i < players.Length; i++)
                 if (players[i].Equals(player)) return i;
         }
@@ -63,7 +63,7 @@ public class ScoreTable : MonoBehaviour, IUISetActive
 
     public Player[] SortToScore()
     {
-        Player[] players = Player.FindPlayersWithCondition(p => p.IsEnterGame && p.IsClient && !p.IsHost);
+        Player[] players = Player.FindPlayersWithCondition(p => p.Name != "");
         List<Player> sortPlayers = players.ToList();
         sortPlayers.Sort((a, b) => a.Score.CompareTo(b.Score));
 

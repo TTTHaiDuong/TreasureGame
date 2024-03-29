@@ -27,7 +27,7 @@ public class ScrollQuestionView : MonoBehaviour
     {
         Database = FindObjectOfType<RemoteDatabase>();
         RemoteDatabase.InvokeIfSuccessful(FillGridView);
-        Database.ExecuteQuery($"SELECT * FROM {DatabaseManager.QuestionsTableName}");
+        Database.ExecuteQuery($"SELECT * FROM {DBProvider.QuestionsTableName}");
     }
 
     public void FillGridView()

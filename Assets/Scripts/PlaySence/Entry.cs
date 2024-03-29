@@ -202,14 +202,14 @@ namespace TreasureGame
     /// <summary>
     /// Làm việc trực tiếp, truy xuất Database.
     /// </summary>
-    public class DatabaseManager
+    public class DBProvider
     {
         public delegate void FailedConnectToServer(object obj);
         public static FailedConnectToServer FailedConnect;
 
         public static int ConnectionTime = 10;
 
-        private const string ConnectionString = @"Data source=DUONG\HAIDUONG;Initial Catalog=TREASUREGAME;Integrated Security = True";
+        public static string ConnectionString = @"Data source=DUONG\HAIDUONG;Initial Catalog=TREASUREGAME;Integrated Security = True";
 
         #region Account
         public const string AccountTableName = "ACCOUNT";

@@ -74,7 +74,7 @@ public class Timer : MonoBehaviour
                 Time = second;
             }
             IsRunning = true;
-            StartCoroutine(Counting());
+            if (gameObject.activeSelf) StartCoroutine(Counting());
         }
     }
     private IEnumerator Counting()

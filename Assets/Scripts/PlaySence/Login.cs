@@ -4,19 +4,21 @@ using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
 using TMPro;
-using TreasureGame;
 using Unity.Netcode;
 using UnityEngine;
 
+/// <summary>
+/// Trang đăng nhập game
+/// </summary>
 public class Login : MonoBehaviour, IUISetActive
 {
-    [SerializeField] private SceneManager Scenes;
-    [SerializeField] private TMP_InputField EmailField;
-    [SerializeField] private TMP_InputField PasswordField;
-    [SerializeField] private TextMeshProUGUI MessageText;
+    [SerializeField] private SceneManager Scenes; // Quản lý trang trò chơi
+    [SerializeField] private TMP_InputField EmailField; // Trường nhập email
+    [SerializeField] private TMP_InputField PasswordField; // Trường nhập mật khẩu
+    [SerializeField] private TextMeshProUGUI MessageText; // Thông báo
 
-    public Timer MessageTimer;
-    private static int ConnectionTime = 0;
+    public Timer MessageTimer; // Timer bật tắt thông báo trong thời gian nhất định
+    public static DataRow Student;
 
     private void Awake()
     {
@@ -27,105 +29,111 @@ public class Login : MonoBehaviour, IUISetActive
 
     private void Update()
     {
+        // Nếu như là máy chủ thì bỏ qua bước đăng nhập
         if (NetworkManager.Singleton.IsServer) Scenes.LoginToWaitingRoom();
     }
 
-    public void EventSubmitClick()
+    /// <summary>
+    /// Kiểm tra email và password, liên kết với sự kiện click nút Đăng nhập
+    /// </summary>
+    public void CheckEmailPassword()
     {
         string email = StringHandler.RemoveNonPrintChars(EmailField.text);
         string password = StringHandler.RemoveNonPrintChars(PasswordField.text);
 
-        Player.ReceiceData -= CheckEmailPassword;
-        Player.ReceiceData += CheckEmailPassword;
-        Player.ExecuteQuery($"SELECT * FROM {DatabaseManager.AccountTableName} " +
-            $"WHERE {DatabaseManager.AccountEmailColumnName} = @email " +
-            $"AND {DatabaseManager.AccountPasswordColumnName} = @password",
-            new string[] { "@email", "@password" }, new string[] { email, password });
-
-        ConnectionTime++;
-        if (ConnectionTime == DatabaseManager.ConnectionTime) CannotConnectToSQLServer();
-    }
-
-    private void CheckEmailPassword()
-    {
-        Player.ReceiceData -= CheckEmailPassword;
-        DataTable tb = Player.Result;
-        if (tb != null)
-            foreach (DataColumn col in tb.Columns) Debug.Log(col.ColumnName);
-
-        if (tb == null || !tb.Columns.Contains(DatabaseManager.AccountEmailColumnName))
+        // Nếu như bảng Account bị trống thì thông báo lỗi
+        if (SceneManager.Account == null)
         {
-            CannotConnectToSQLServer();
-            return;
-        }
-
-        if (tb.Rows.Count == 0)
-        {
-            MessageTimer.StartObj = "Đăng nhập không thành công!";
-            MessageTimer.Play(3);
-            return;
-        }
-
-        Debug.Log(tb.Rows[0][0].ToString());
-
-        if (CheckLoggedIn(tb.Rows[0][0].ToString()))
-        {
-            MessageTimer.StartObj = "Tài khoản đã được đăng nhập!";
+            MessageTimer.StartObj = "Không thể kết nối đến máy chủ!";
             MessageTimer.Play(3);
         }
+        // Nếu đúng email và mật khẩu
+        else if (IscorrectEmailPassword(email, password, out DataRow found))
+        {
+            // Nếu tài khoản đã được đăng nhập
+            if (CheckLoggedIn(found[0].ToString()))
+            {
+                MessageTimer.StartObj = "Tài khoản đã được đăng nhập!";
+                MessageTimer.Play(3);
+            }
+            // Nếu như tài khoản chưa được đăng nhập
+            else
+            {
+                Student = found;
+                Scenes.LoginToWaitingRoom();
+            }
+        }
+        // Nếu như sai tài khoản hay mật khẩu
         else
         {
-            Player.GetOwner().IsLoggedIn = true;
-            Player.GetOwner().StudentId = tb.Rows[0][0].ToString();
-            Scenes.LoginToWaitingRoom();
+            MessageTimer.StartObj = "Thông tin đăng nhập không chính xác!";
+            MessageTimer.Play(3);
         }
-        ConnectionTime = 0;
     }
 
-    private bool CheckLoggedIn(string studentId)
+    /// <summary>
+    /// Kiểm tra tính đúng đắn của thông tin đăng nhập
+    /// </summary>
+    /// <param name="email">Email</param>
+    /// <param name="password">Mật khẩu</param>
+    /// <param name="foundRow">Dòng chứa email và mật khẩu đó trong CSDL</param>
+    /// <returns>Nếu thông tin chính xác là true, ngược lại false</returns>
+    private bool IscorrectEmailPassword(string email, string password, out DataRow foundRow)
     {
-        Player[] players = Player.FindPlayersWithCondition(p => p.IsLoggedIn);
-        foreach (Player p in players)
-            if (p != Player.GetOwner() && Player.GetOwner().StudentId == studentId) return true;
-
+        foreach (DataRow row in SceneManager.Account.Rows)
+            if (row[2].ToString() == email && row[3].ToString() == password)
+            {
+                foundRow = row;
+                return true;
+            }
+        foundRow = null;
         return false;
     }
 
-    private void CannotConnectToSQLServer()
+    /// <summary>
+    /// Kiểm tra tài khoản có được đăng nhập chưa
+    /// </summary>
+    /// <param name="studentId">Mã số sinh viên</param>
+    /// <returns>True: tài khoản đã đăng nhập, ngược lại false</returns>
+    private bool CheckLoggedIn(string studentId)
     {
-        Player.ReceiceData -= CheckEmailPassword;
-        MessageTimer.StartObj = "Không thể kết nối đến máy chủ!";
-        MessageTimer.Play(3);
-        ConnectionTime = 0;
-    }
-
-    public void ReadAdminConfigFile(string path)
-    {
-        string[] lines = File.ReadAllLines(path);
-        SceneManager.RoomPassword = lines[0];
-        int.TryParse(lines[1], out SceneManager.PlayingTime);
+        if (Student == null) return false;
+        else if (Student[0].ToString() != studentId) return false;
+        else return true;
     }
 
     public void SetActive(bool active)
     {
         gameObject.SetActive(active);
-        if (MessageTimer != null) MessageTimer.Promote();
+        MessageTimer.Promote();
     }
 }
 
+/// <summary>
+/// Xử lý chuỗi
+/// </summary>
 public class StringHandler
 {
+    /// <summary>
+    /// Đơn giản hoá các kí tự unicode, xoá bỏ dấu của chữ tiếng Việt
+    /// </summary>
     public static string Simplify(string complexString)
     {
         return Regex.Replace(complexString, @"[^\u0020-\u007E]", string.Empty);
     }
 
+    /// <summary>
+    /// Xoá bỏ các kí tự không in ra được trong unicode
+    /// </summary>
     public static string RemoveNonPrintChars(string text)
     {
         return Regex.Replace(text, @"[^\p{IsBasicLatin}\p{IsLatin-1Supplement}\p{IsLatinExtended-A}\p{IsLatinExtended-B}\p{IsCombiningDiacriticalMarks}]+", "");
     }
 }
 
+/// <summary>
+/// Active của các trang ứng dụng
+/// </summary>
 public interface IUISetActive
 {
     void SetActive(bool active);
@@ -143,8 +151,19 @@ public interface IUISetActive
     }
 }
 
+/// <summary>
+/// Thệ thống quét các thiết bị mạng
+/// </summary>
 public class ServerHostScaning
 {
+    /* Tóm tắt:
+     * Sử dụng phương thức Scan để bắt đầu một máy chủ hay máy khách
+     * Máy này thành lập một máy khách giả để tìm kiếm máy chủ
+     * Nếu tìm thấy máy chủ thì giữ nguyên trạng thái là máy khách
+     * Nếu không tìm thấy bất kì máy nào khác và trong máy tính có file cài đặt game thì thành lập máy chủ
+     * Kết thúc
+     */
+
     private static Player[] ConnectedPlayers;
     private static readonly Timer ScanningTimer;
     private static readonly Timer ConnectingOrSetUpTimer;
@@ -164,6 +183,9 @@ public class ServerHostScaning
         ConnectedPlayers = new Player[0];
     }
 
+    /// <summary>
+    /// Bắt đầu quét
+    /// </summary>
     public static void Scan(float scanningTime)
     {
         NetworkManager.Singleton.Shutdown();
@@ -174,27 +196,31 @@ public class ServerHostScaning
         }
     }
 
+    // Đếm số lượng các máy kết nối được
     private static void ClientOrServer(object obj)
     {
         Player[] remotes = GameObject.FindObjectsOfType<Player>();
         ConnectedPlayers = remotes;
+        if (ConnectedPlayers.Length > 1) return;
         NetworkManager.Singleton.Shutdown();
 
         ConnectingOrSetUpTimer.Play(1);
     }
 
+    // Bắt đầu một máy server hay client
     private static void Start(object obj)
     {
-        if (ConnectedPlayers.Length == 0 && File.Exists(@"C:\Users\tranh\OneDrive\Tài liệu\Desktop Application Development\TreasureAdmin.txt"))
+        if (ConnectedPlayers.Length == 0 && File.Exists(SceneManager.SettingGameFile))
         {
             NetworkManager.Singleton.StartHost();
-            Resources.FindObjectsOfTypeAll<Login>()[0].ReadAdminConfigFile(@"C:\Users\tranh\OneDrive\Tài liệu\Desktop Application Development\TreasureAdmin.txt");
+            Resources.FindObjectsOfTypeAll<SceneManager>()[0].ReadAdminConfigFile(SceneManager.SettingGameFile);
         }
         else NetworkManager.Singleton.StartClient();
 
         AfterScanning?.Invoke();
     }
 
+    // Vượt qua thời gian quét nếu tìm thấy bất kì máy nào
     private static void IfAnyOtherConnectingsAreFound(object obj)
     {
         if (ConnectedPlayers.Length > 1)

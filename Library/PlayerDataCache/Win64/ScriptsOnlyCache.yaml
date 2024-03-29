@@ -79,6 +79,7 @@ ScriptsOnlyBuild:
   serializedClasses:
     Unity.Netcode.Runtime:
     - Unity.Netcode.NetworkConfig
+    - Unity.Netcode.NetworkPrefab
     - Unity.Netcode.NetworkPrefabs
     - Unity.Netcode.Transports.UTP.UnityTransport/ConnectionAddressData
     - Unity.Netcode.Transports.UTP.UnityTransport/SimulatorParameters
@@ -140,13 +141,13 @@ ScriptsOnlyBuild:
     methodName: OnPointedExit
   - assembly: Assembly-CSharp
     fullTypeName: WaitingRoom
+    methodName: EventHostStartGameClick
+  - assembly: Assembly-CSharp
+    fullTypeName: WaitingRoom
     methodName: EventRequestToEnterClick
   - assembly: Assembly-CSharp
     fullTypeName: MultipleChoice
     methodName: Button2
-  - assembly: Assembly-CSharp
-    fullTypeName: WaitingRoom
-    methodName: EventHostStartGameClick
   - assembly: Assembly-CSharp
     fullTypeName: Warning
     methodName: OnPointedEnter
@@ -173,7 +174,7 @@ ScriptsOnlyBuild:
     methodName: ServerClick
   - assembly: Assembly-CSharp
     fullTypeName: Login
-    methodName: EventSubmitClick
+    methodName: CheckEmailPassword
   - assembly: Assembly-CSharp
     fullTypeName: MultipleChoice
     methodName: Button3
@@ -614,7 +615,7 @@ ScriptsOnlyBuild:
     className: MultiplayerDebug
   - hash:
       serializedVersion: 2
-      Hash: 1a37d408ced7b677ae57059a9eafbd3d
+      Hash: eb500225129b59f7e2ce82e5b6a7bca6
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Player
@@ -782,7 +783,7 @@ ScriptsOnlyBuild:
     className: ContentSizeFitter
   - hash:
       serializedVersion: 2
-      Hash: 0c2462b77eb43759081efbcf15aebfe0
+      Hash: 59d910cd9be2b8b19e47dacb8fb15ce9
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: WaitingRoom
@@ -806,7 +807,7 @@ ScriptsOnlyBuild:
     className: ScriptMachine
   - hash:
       serializedVersion: 2
-      Hash: 5732bc5bf4ce88287106f44d0f53c5cc
+      Hash: 42fc7cd37fc5a50dda661e7859a898fb
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Island

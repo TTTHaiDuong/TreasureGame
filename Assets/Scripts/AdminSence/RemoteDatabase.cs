@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using TreasureGame;
 using Unity.Netcode;
@@ -6,6 +6,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using System.Text;
 
 public class RemoteDatabase : NetworkBehaviour
 {
@@ -58,7 +59,7 @@ public class RemoteDatabase : NetworkBehaviour
         Result = null;
         if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
         {
-            Result = DatabaseManager.ExecuteQuery(query);
+            Result = DBProvider.ExecuteQuery(query);
             IfSuccessful?.Invoke();
         }
         else GetOwner().DatabaseServerRpc(query);
@@ -69,7 +70,7 @@ public class RemoteDatabase : NetworkBehaviour
         Result = null;
         if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
         {
-            Result = DatabaseManager.ExecuteQuery(query, parameters, values);
+            Result = DBProvider.ExecuteQuery(query, parameters, values);
             IfSuccessful?.Invoke();
         }
         else
@@ -96,7 +97,7 @@ public class RemoteDatabase : NetworkBehaviour
     [ClientRpc]
     private void DatabaseClientRpc(string query)
     {
-        Result = DatabaseManager.ExecuteQuery(query);
+        Result = DBProvider.ExecuteQuery(query);
         IfSuccessful?.Invoke();
     }
 
@@ -105,7 +106,7 @@ public class RemoteDatabase : NetworkBehaviour
     {
         string[] parameters = paraS.Deserialize();
         string[] values = valS.Deserialize();
-        Result = DatabaseManager.ExecuteQuery(query, parameters, values);
+        Result = DBProvider.ExecuteQuery(query, parameters, values);
         IfSuccessful?.Invoke();
     }
 
@@ -131,13 +132,42 @@ public class RemoteDatabase : NetworkBehaviour
     }
 }
 
+//public class DataTableSerializable : INetworkSerializable
+//{
+//    public DataTableSerializable(DataTable table)
+//    {
+//        SerializedString = JsonConvert.SerializeObject(table);
+//    }
+//    public DataTableSerializable() { }
+
+//    public string SerializedString;
+
+//    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+//    {
+//        serializer.SerializeValue(ref SerializedString);
+//    }
+
+//    public DataTable Deserialize()
+//    {
+//        return JsonConvert.DeserializeObject<DataTable>(SerializedString);
+//    }
+//}
+
+/// <summary>
+/// Lớp Serialize DataTable
+/// </summary>
 public class DataTableSerializable : INetworkSerializable
 {
     public DataTableSerializable(DataTable table)
     {
+        if (table == null) throw new ArgumentNullException(nameof(table), "DataTable cannot be null.");
         SerializedString = JsonConvert.SerializeObject(table);
     }
     public DataTableSerializable() { }
+    public DataTableSerializable(string serializedString)
+    {
+        SerializedString = serializedString;
+    }
 
     public string SerializedString;
 
@@ -179,7 +209,7 @@ public class ArraySerializable<T> : INetworkSerializable
 
     public T[] Deserialize()
     {
-        if (SerializedString == "") return new T[0]; 
+        if (SerializedString == "") return new T[0];
         Wrapper wrapper = JsonUtility.FromJson<Wrapper>(SerializedString);
         return wrapper.Items.ToArray();
     }

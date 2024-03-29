@@ -2,9 +2,12 @@
 using Unity.Netcode;
 using UnityEngine;
 
+/// <summary>
+/// Phòng chờ
+/// </summary>
 public class WaitingRoom : MonoBehaviour, IUISetActive
 {
-    [SerializeField] private SceneManager Scenes;
+    [SerializeField] private SceneManager Scene;
     [SerializeField] private TextMeshProUGUI CountPlayer;
     [SerializeField] private TextMeshProUGUI PlayerList;
 
@@ -14,25 +17,30 @@ public class WaitingRoom : MonoBehaviour, IUISetActive
     [SerializeField] private TMP_InputField Password;
 
     public TMP_InputField InputPlayerName;
-    public bool RequestFlag;
+    public bool RequestFlag; // Người chơi gửi lời yêu cầu vào phòng game nếu đã đúng các thông tin cần có trong game
 
     private void Update()
     {
         Listed();
     }
 
+    /// <summary>
+    /// Liệt kê danh sách người chơi
+    /// </summary>
     private void Listed()
     {
-        Player[] players = Player.FindPlayersWithCondition(p => p.IsLoggedIn && p.IsClient && !p.IsHost);
+        Player[] players = Player.FindPlayersWithCondition(p => p.Name != "");
 
         CountPlayer.text = $"Hiện tại có {players.Length} người tham gia";
         string setList = string.Empty;
-        foreach (Player p in players)
-            if (p.StudentId != "") setList += p.Name + "     ";
+        foreach (Player p in players) setList += p.Name + "          ";
 
         PlayerList.text = setList;
     }
 
+    /// <summary>
+    /// Sự kiện click của nút yêu cầu vào phòng
+    /// </summary>
     public void EventRequestToEnterClick()
     {
         Player.GetOwner().Name = StringHandler.RemoveNonPrintChars(InputPlayerName.text);
@@ -41,15 +49,21 @@ public class WaitingRoom : MonoBehaviour, IUISetActive
         else RequestFlag = false;
     }
 
+    /// <summary>
+    /// Sự kiện thay đổi giá trị của trường nhập mật khẩu
+    /// </summary>
     public void EventRoomPasswordInputFieldTextChangedHandler()
     {
         RequestFlag = false;
     }
 
+    /// <summary>
+    /// Sự kiện click của nút máy chủ bắt đầu game
+    /// </summary>
     public void EventHostStartGameClick()
     {
-        Scenes.WaitingRoomToPlay();
         SceneManager.EnterGame = true;
+        Scene.WaitingRoomToPlay();
     }
 
     public void SetActive(bool active)
@@ -58,6 +72,9 @@ public class WaitingRoom : MonoBehaviour, IUISetActive
         gameObject.SetActive(active);
     }
 
+    /// <summary>
+    /// Xây dựng trang giao diện nếu như là máy chủ sử dụng controls của máy chủ, ngược lại
+    /// </summary>
     public void DisplayControlsOfServerOrClient()
     {
         ServerControls.gameObject.SetActive(NetworkManager.Singleton.IsServer || NetworkManager.Singleton.IsHost);
